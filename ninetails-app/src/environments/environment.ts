@@ -5,7 +5,7 @@
  */
 export const environment = {
   /** true  -> ApiService reads /mock/*.json and DeployService simulates the call */
-  useMock: false,
+  useMock: true,
   appVersion: '0.1.0',
   /** Base URL of the Go backend REST API (versioned). Contract: docs/api.md. */
   apiBaseUrl: '/api/v1',
