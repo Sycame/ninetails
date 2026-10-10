@@ -1074,23 +1074,19 @@
   "teams": [
     {
       "id": "team-platform",
-      "name": "Platform",
-      "contact": "platform@example.com"
+      "name": "Platform"
     },
     {
       "id": "team-apps",
-      "name": "Applications",
-      "contact": "apps@example.com"
+      "name": "Applications"
     },
     {
       "id": "team-payments",
-      "name": "Payments",
-      "contact": "payments@example.com"
+      "name": "Payments"
     },
     {
       "id": "team-data",
-      "name": "Data & ML",
-      "contact": "data@example.com"
+      "name": "Data & ML"
     }
   ]
 }

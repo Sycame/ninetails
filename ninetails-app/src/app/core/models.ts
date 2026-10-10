@@ -18,7 +18,6 @@ export interface HealthCheck {
 export interface Team {
   id: string;
   name: string;
-  contact?: string;
 }
 
 export interface User {

@@ -15,9 +15,8 @@ const (
 // Contains NO health information: that lives in the status types further down.
 
 type Team struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Contact string `json:"contact,omitempty"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type Environment struct {

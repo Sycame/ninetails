@@ -339,8 +339,7 @@
         "required": ["id", "name"],
         "properties": {
           "id": { "type": "string" },
-          "name": { "type": "string" },
-          "contact": { "type": "string" }
+          "name": { "type": "string" }
         }
       },
       "Environment": {
