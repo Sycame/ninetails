@@ -1,0 +1,13 @@
+<div class="wrap">
+  <mat-card>
+    <mat-card-content class="stack">
+      <app-logo [size]="88" />
+      <h1>Ninetails</h1>
+      <button mat-flat-button (click)="signIn()">
+        Sign in with GitLab
+        <mat-icon svgIcon="gitlab" iconPositionEnd />
+      </button>
+      @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+    </mat-card-content>
+  </mat-card>
+</div>

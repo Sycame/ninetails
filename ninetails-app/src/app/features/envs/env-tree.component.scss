@@ -1,0 +1,14 @@
+:host { display: block; }
+.row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; margin-bottom: 2px;
+       background: var(--mat-sys-surface-container-high); border-left: 3px solid var(--mat-sys-outline-variant); }
+.row.vm { background: var(--mat-sys-surface-container-low); margin-left: 0; }
+.host { margin-bottom: 2px; }
+.host mat-panel-title { align-items: center; gap: 8px; flex: 1.2; }
+.host mat-panel-description { align-items: center; justify-content: flex-end; gap: 12px; }
+.name { font-weight: 500; }
+.muted { color: var(--mat-sys-on-surface-variant); }
+.model { font-size: 12px; }
+.count { color: var(--mat-sys-tertiary); font-size: 12px; }
+.spacer { flex: 1; }
+.kind { font-size: 18px; width: 18px; height: 18px; color: var(--mat-sys-tertiary); }
+a[mat-icon-button] { width: 32px; height: 32px; padding: 4px; }

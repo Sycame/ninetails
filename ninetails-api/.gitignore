@@ -1,0 +1,7 @@
+# build output
+/ninetails-api
+/ninetails-api.exe
+/bin/
+
+# local baseline copies used with NINETAILS_CONFIG_FILE
+/local/

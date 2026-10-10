@@ -1,0 +1,4 @@
+<span class="badge" [class]="'s-' + status()" [attr.aria-label]="'Status ' + status()">
+  <mat-icon aria-hidden="true">{{ icons[status()] }}</mat-icon>
+  @if (!compact()) { {{ status() }} }
+</span>

@@ -1,0 +1,82 @@
+// App-wide NEON component style - the look first built for the Racks tab, applied to everything:
+// square panels with a neon edge, soft glow, a small lift on hover and a glowing "selected" state.
+// It only uses tokens (--neon-*, --glow, --mat-sys-*) defined in styles.scss, so it follows the
+// light/dark toggle automatically. Component-level tweaks go in the component; shared look goes here.
+
+// ---- Material component tokens (Material reads these with var(--token, fallback)) -------------
+html {
+  // cards / panels
+  --mat-card-outlined-container-color: var(--mat-sys-surface-container);
+  --mat-card-outlined-outline-color: color-mix(in srgb, var(--neon-violet) 45%, transparent);
+  --mat-card-elevated-container-color: var(--mat-sys-surface-container);
+  // navigation drawer + details drawer
+  --mat-sidenav-container-background-color: var(--mat-sys-surface-container-low);
+  --mat-sidenav-container-divider-color: var(--neon-violet);
+  --mat-sidenav-content-background-color: var(--mat-sys-surface);
+  // selected nav item uses the primary tint instead of the default secondary one
+  --mat-list-active-indicator-color: var(--mat-sys-primary-container);
+  // outlined buttons / form fields / chips
+  --mat-button-outlined-outline-color: var(--neon-violet);
+  --mat-form-field-outlined-outline-color: var(--mat-sys-outline);
+  --mat-form-field-outlined-hover-outline-color: var(--neon-violet);
+  --mat-form-field-outlined-focus-outline-color: var(--neon-magenta);
+  --mat-chip-outline-color: var(--neon-violet);
+  --mat-divider-color: var(--mat-sys-outline-variant);
+}
+
+// ---- panels: cards lift and glow on hover (same feel as rack nodes) ----------------------------
+.mat-mdc-card {
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1), box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+  &:hover { transform: translateY(-2px); box-shadow: 0 0 12px color-mix(in srgb, var(--neon-violet) 40%, transparent); }
+}
+
+// Status edge, like the colored left border on rack nodes: <mat-card class="edge" [attr.data-status]="status">
+.edge {
+  border-left: 4px solid var(--edge, transparent);
+  &[data-status='OK'] { --edge: var(--status-ok); }
+  &[data-status='WARN'] { --edge: var(--status-warn); box-shadow: 0 0 6px var(--status-warn); }
+  &[data-status='FAIL'] { --edge: var(--status-fail); box-shadow: 0 0 8px var(--status-fail); }
+}
+
+// ---- lists + navigation: neon left marker, glow when active -----------------------------------
+.mat-mdc-list-item {
+  border-left: 3px solid transparent;
+  transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+.mat-mdc-nav-list .mat-mdc-list-item {
+  &:hover { background: var(--mat-sys-surface-container-highest); border-left-color: var(--neon-violet); }
+  &.mdc-list-item--activated { border-left-color: var(--neon-magenta); box-shadow: var(--glow); }
+}
+
+// ---- inputs, menus, dropdown panels, tooltips, snackbars --------------------------------------
+.mat-mdc-form-field.mat-focused .mdc-notched-outline {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--neon-magenta) 60%, transparent));
+}
+.mat-mdc-select-panel, .mat-mdc-menu-panel {
+  border: 1px solid var(--neon-violet);
+  box-shadow: var(--glow);
+}
+.mat-mdc-option.mdc-list-item--selected { border-left: 3px solid var(--neon-magenta); }
+.mdc-tooltip__surface { border: 1px solid var(--neon-violet); }
+.mat-mdc-snack-bar-container .mdc-snackbar__surface { border-left: 4px solid var(--neon-magenta); box-shadow: var(--glow); }
+
+// Primary buttons glow (the same token the header uses).
+.mat-mdc-unelevated-button.mat-primary, .mdc-button--unelevated { box-shadow: var(--glow); }
+
+// Links
+a { text-shadow: var(--link-glow); }
+
+// ---- page headings: neon bar, matching the rack name heading ----------------------------------
+h1, h2 { border-left: 4px solid var(--neon-magenta); padding-left: 12px; }
+h3 { color: var(--mat-sys-on-surface-variant); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.08em; }
+
+// ---- details / helper blocks ------------------------------------------------------------------
+::selection { background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
+
+// Thin neon scrollbars (Firefox/Chromium).
+* { scrollbar-width: thin; scrollbar-color: var(--neon-violet) var(--mat-sys-surface-container); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mat-mdc-card, .mat-mdc-list-item { transition: none; }
+  .mat-mdc-card:hover { transform: none; }
+}

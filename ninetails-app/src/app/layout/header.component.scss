@@ -1,0 +1,14 @@
+/* Colors/glow come from tokens in styles.scss: solid primary in light, dark gradient + neon edge in dark. */
+mat-toolbar { background: var(--app-header-bg); color: var(--app-header-fg);
+              border-bottom: 1px solid var(--app-header-border);
+              box-shadow: var(--glow-strong);
+              --mat-icon-button-icon-color: var(--app-header-fg);
+              --mat-button-text-label-text-color: var(--app-header-fg); }
+.spacer { flex: 1; }
+/* the logo is the nav toggle: keep its own colours, centre it in the round button */
+.logo-button { display: inline-flex; align-items: center; justify-content: center; }
+.title { margin-left: 8px; }
+.name { margin: 0 8px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-left: 4px;
+           border: 2px solid var(--neon-magenta); box-shadow: var(--glow); }
+@media (max-width: 600px) { .name, .title { display: none; } }

@@ -1,0 +1,63 @@
+@if (vm$ | async; as vm) {
+  @if (vm.node; as node) {
+    <div class="head">
+      <h2>{{ node.name }}</h2>
+      <button mat-icon-button (click)="closed.emit()" aria-label="Close details"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <dl>
+      <dt>Status</dt><dd><app-status-badge [status]="node.status" /></dd>
+      <dt>Type</dt><dd>{{ node.type }}</dd>
+      <dt>Model</dt><dd>{{ node.model }}</dd>
+      <dt>Position</dt>
+      <dd>
+        @if (vm.chassis; as ch) { In {{ ch.name }} (U{{ ch.positionU }}, {{ ch.sizeU }}U) }
+        @else { U{{ node.positionU }} ({{ node.sizeU }}U) }
+      </dd>
+      <dt>Environment</dt>
+      <dd>
+        @if (vm.env) { <a [routerLink]="['/envs', vm.env.id]">{{ vm.env.name }}</a> } @else { — }
+      </dd>
+      <dt>Team</dt><dd>{{ vm.team?.name ?? '—' }}</dd>
+    </dl>
+
+    <mat-divider />
+    <h3>Health checks</h3>
+    <mat-list>
+      @for (c of node.checks; track c.name) {
+        <mat-list-item>
+          <app-status-badge matListItemIcon [status]="c.status" [compact]="true" />
+          <span matListItemTitle>{{ c.name }}</span>
+          <span matListItemLine>{{ c.message ?? 'OK' }} · {{ c.checkedAt | date: 'shortTime' }}</span>
+        </mat-list-item>
+      }
+    </mat-list>
+
+    <!-- Network: hostname, management address, and one block per interface. -->
+    @if (node.network; as net) {
+      <mat-divider />
+      <h3>Network</h3>
+      <dl class="net">
+        <dt>Hostname</dt><dd class="mono">{{ net.hostname }}</dd>
+        @if (net.mgmtIp) { <dt>Mgmt (BMC)</dt><dd class="mono">{{ net.mgmtIp }}</dd> }
+        @if (net.gateway) { <dt>Gateway</dt><dd class="mono">{{ net.gateway }}</dd> }
+      </dl>
+      @for (i of net.interfaces; track i.name) {
+        <div class="iface" [class.down]="!i.linkUp">
+          <div class="iface-head">
+            <mat-icon [attr.aria-label]="i.linkUp ? 'Link up' : 'Link down'">{{ i.linkUp ? 'link' : 'link_off' }}</mat-icon>
+            <strong>{{ i.name }}</strong>
+            @if (i.purpose) { <span class="muted">{{ i.purpose }}</span> }
+            <span class="spacer"></span>
+            <span class="muted">{{ i.speedGbps }} Gbps</span>
+          </div>
+          <div class="mono">{{ i.ipAddress }}</div>
+          <div class="mono muted">{{ i.mac }}@if (i.vlan) { · VLAN {{ i.vlan }} }</div>
+        </div>
+      }
+    }
+
+  } @else {
+    <p>Node not found.</p>
+  }
+}

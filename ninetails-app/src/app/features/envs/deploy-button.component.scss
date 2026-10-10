@@ -1,0 +1,4 @@
+button mat-spinner { display: inline-block; margin-right: 8px; }
+.result { margin-top: 8px; min-height: 24px; }
+.result span { display: inline-flex; align-items: center; gap: 4px; }
+.ok { color: var(--status-ok); } .bad { color: var(--status-fail); }

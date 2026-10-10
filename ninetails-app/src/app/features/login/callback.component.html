@@ -1,0 +1,8 @@
+@if (error()) {
+  <div class="box" role="alert">
+    <p class="err">Sign-in failed: {{ error() }}</p>
+    <a mat-flat-button routerLink="/login">Back to sign in</a>
+  </div>
+} @else {
+  <mat-spinner diameter="40" />
+}

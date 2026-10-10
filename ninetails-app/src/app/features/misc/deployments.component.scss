@@ -1,0 +1,6 @@
+.st-succeeded { color: var(--status-ok); }
+.st-failed { color: var(--status-fail); }
+.st-queued { color: var(--status-warn); }
+.st-running { color: var(--neon-cyan); animation: spin 1.2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .st-running { animation: none; } }

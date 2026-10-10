@@ -1,0 +1,5 @@
+[
+  { "id": "d-1003", "envId": "env-staging", "envName": "staging", "status": "succeeded", "startedBy": "dev", "startedAt": "2026-10-08T14:02:11Z", "finishedAt": "2026-10-08T14:06:40Z", "pipelineUrl": "https://gitlab.example.com/acme/app/-/pipelines/1003", "message": "Pipeline #1003 passed." },
+  { "id": "d-1002", "envId": "env-legacy", "envName": "legacy", "status": "failed", "startedBy": "jdoe", "startedAt": "2026-10-08T09:30:00Z", "finishedAt": "2026-10-08T09:31:05Z", "pipelineUrl": "https://gitlab.example.com/acme/app/-/pipelines/1002", "message": "Environment is locked." },
+  { "id": "d-1001", "envId": "env-prod", "envName": "prod", "status": "succeeded", "startedBy": "dev", "startedAt": "2026-10-07T16:45:00Z", "finishedAt": "2026-10-07T16:52:30Z", "pipelineUrl": "https://gitlab.example.com/acme/app/-/pipelines/1001", "message": "Pipeline #1001 passed." }
+]

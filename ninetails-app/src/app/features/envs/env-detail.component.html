@@ -1,0 +1,19 @@
+<a mat-button routerLink="/envs"><mat-icon>arrow_back</mat-icon> Environments</a>
+
+@if (summary$ | async; as s) {
+  <div class="head">
+    <h1>{{ s.env.name }}</h1>
+    <app-status-badge [status]="s.status" />
+  </div>
+  <p>
+    {{ s.env.description }}
+    @if (s.env.description) { · }
+    Team: <a routerLink="/envs" [queryParams]="{ team: s.env.teamId }">{{ s.team?.name ?? 'none' }}</a>
+    · {{ s.servers.length }} servers · {{ s.switches.length }} switches · {{ s.vms.length }} VMs
+  </p>
+
+  <app-deploy-button [envId]="s.env.id" [envName]="s.env.name" />
+  <app-env-tree [summary]="s" />
+} @else {
+  <p>Environment not found (or still loading).</p>
+}

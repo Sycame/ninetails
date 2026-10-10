@@ -1,0 +1,16 @@
+<button mat-flat-button [disabled]="state().phase === 'loading'" (click)="deploy()">
+  @if (state().phase === 'loading') {
+    <mat-spinner diameter="18" />
+  } @else {
+    <mat-icon>rocket_launch</mat-icon>
+  }
+  {{ state().phase === 'loading' ? 'Deploying…' : 'Deploy to ' + envName() }}
+</button>
+
+<!-- aria-live so screen readers announce the result -->
+<div class="result" aria-live="polite">
+  @switch (state().phase) {
+    @case ('success') { <span class="ok"><mat-icon>check_circle</mat-icon> {{ state().message }}</span> }
+    @case ('error') { <span class="bad"><mat-icon>error</mat-icon> {{ state().message }}</span> }
+  }
+</div>

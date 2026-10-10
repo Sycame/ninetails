@@ -1,0 +1,212 @@
+// Theme: Material 3 "Magenta & Violet" base + a custom NEON look in two variants (dark and light).
+//
+// How it works:
+//  - mat.theme() emits every --mat-sys-* design token, using light-dark() so the CSS `color-scheme`
+//    property picks the set. ThemeService puts `light-theme` / `dark-theme` on <html>.
+//  - The neon look is a handful of --mat-sys-* overrides under `html.light-theme` / `html.dark-theme`
+//    (higher specificity than the generated rules), so every Material component picks them up with no
+//    per-component CSS. Both variants share hues and glows; only lightness differs.
+//  - App-level tokens (status colors, header colors, glow) are defined once here and used by components.
+@use '@angular/material' as mat;
+@use './fonts'; // self-hosted Roboto + Material Symbols (no internet needed)
+@use './neon'; // app-wide neon component style (shared by every tab)
+
+html {
+  height: 100%;
+  color-scheme: light dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$magenta-palette,
+        tertiary: mat.$violet-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // ---- SHAPE: square corners everywhere ----
+  // Material 3 reads all corner radii from these tokens (buttons, cards, chips, menus, dialogs,
+  // form fields, snackbars...), so zeroing them removes every rounded corner at once.
+  // Use 0px, never a bare 0: Material computes e.g. max(16px, <corner>) from these, and max(16px, 0) is invalid CSS,
+  // which silently drops the padding of every outlined field (text touching the border).
+  // Placed after mat.theme() so it wins. To bring rounding back, delete this block.
+  --mat-sys-corner-none: 0px;
+  --mat-sys-corner-extra-small: 0px;
+  --mat-sys-corner-extra-small-top: 0px;
+  --mat-sys-corner-small: 0px;
+  --mat-sys-corner-medium: 0px;
+  --mat-sys-corner-large: 0px;
+  --mat-sys-corner-large-start: 0px;
+  --mat-sys-corner-large-end: 0px;
+  --mat-sys-corner-large-top: 0px;
+  --mat-sys-corner-extra-large: 0px;
+  --mat-sys-corner-extra-large-top: 0px;
+  --mat-sys-corner-full: 0px;
+
+  &.light-theme { color-scheme: light; }
+  &.dark-theme { color-scheme: dark; }
+
+  // ---- app tokens: fallbacks only; both themes below override them ----
+  --neon-magenta: #d4009f;
+  --neon-violet: #6a3de8;
+  --neon-cyan: #00a5b5;
+  --status-ok: #00a650;
+  --status-warn: #c77700;
+  --status-fail: #e0003c;
+  --app-header-bg: var(--mat-sys-primary);
+  --app-header-fg: var(--mat-sys-on-primary);
+  --app-header-border: transparent;
+  --glow: none;          // box-shadow used on focus/selection accents
+  --glow-strong: none;
+  --link-glow: none;
+}
+
+// ---- NEON LIGHT -----------------------------------------------------------------------------
+// The dark neon theme's twin: same hues (hot magenta / electric violet / cyan), same glows, same
+// structure, but on pale lavender-white surfaces with deeper accent shades so text keeps its contrast.
+html.light-theme {
+  --neon-magenta: #d4009f;
+  --neon-violet: #6a3de8;
+  --neon-cyan: #00a5b5;
+
+  // surfaces: lightest at the back, gently tinted containers in front
+  --mat-sys-background: #faf7ff;
+  --mat-sys-surface: #faf7ff;
+  --mat-sys-surface-dim: #e6def7;
+  --mat-sys-surface-bright: #ffffff;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f5f0ff;
+  --mat-sys-surface-container: #efe8ff;
+  --mat-sys-surface-container-high: #e8e0fb;
+  --mat-sys-surface-container-highest: #e0d6f7;
+  --mat-sys-surface-variant: #e9e1fa;
+  --mat-sys-on-background: #1a1033;
+  --mat-sys-on-surface: #1a1033;
+  --mat-sys-on-surface-variant: #55478a;
+  --mat-sys-outline: #8d7fc4;
+  --mat-sys-outline-variant: #d6cdf0;
+  --mat-sys-scrim: #000000;
+  --mat-sys-shadow: #1a1033;
+  --mat-sys-surface-tint: #d4009f;
+
+  // primary = hot magenta
+  --mat-sys-primary: #d4009f;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #ffd6f5;
+  --mat-sys-on-primary-container: #4a0040;
+  // secondary = electric violet
+  --mat-sys-secondary: #6a3de8;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e5dcff;
+  --mat-sys-on-secondary-container: #20074f;
+  // tertiary = cyan
+  --mat-sys-tertiary: #00838f;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #bff6ff;
+  --mat-sys-on-tertiary-container: #00363d;
+  // error = vivid red-pink
+  --mat-sys-error: #d8003c;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #ffd9e0;
+  --mat-sys-on-error-container: #5c0018;
+  --mat-sys-inverse-surface: #1a1033;
+  --mat-sys-inverse-on-surface: #f1ecff;
+  --mat-sys-inverse-primary: #ff4fdc;
+
+  // app tokens
+  --status-ok: #00a650;
+  --status-warn: #c77700;
+  --status-fail: #e0003c;
+  --app-header-bg: linear-gradient(90deg, #ffe3f8, #ece2ff 55%, #dcf8ff);
+  --app-header-fg: #1a1033;
+  --app-header-border: var(--neon-magenta);
+  // glows are softer on light backgrounds so they read as a colored halo, not a smudge
+  --glow: 0 0 8px color-mix(in srgb, var(--neon-magenta) 35%, transparent);
+  --glow-strong: 0 0 12px color-mix(in srgb, var(--neon-magenta) 45%, transparent),
+                 0 0 2px var(--neon-magenta);
+  --link-glow: none;
+}
+
+// ---- NEON DARK ------------------------------------------------------------------------------
+// Palette: near-black violet backgrounds; hot magenta (primary), electric violet (secondary),
+// cyan (tertiary). Containers are deep, saturated shades of the same hue so neon text on them stays readable.
+html.dark-theme {
+  --neon-magenta: #ff2bd6;
+  --neon-violet: #b388ff;
+  --neon-cyan: #00e5ff;
+
+  // surfaces: darker the further "back" they sit
+  --mat-sys-background: #07060d;
+  --mat-sys-surface: #07060d;
+  --mat-sys-surface-dim: #05040a;
+  --mat-sys-surface-bright: #1f1c33;
+  --mat-sys-surface-container-lowest: #040309;
+  --mat-sys-surface-container-low: #0c0a16;
+  --mat-sys-surface-container: #110e1f;
+  --mat-sys-surface-container-high: #181430;
+  --mat-sys-surface-container-highest: #211b3d;
+  --mat-sys-surface-variant: #1b1630;
+  --mat-sys-on-background: #f1ecff;
+  --mat-sys-on-surface: #f1ecff;
+  --mat-sys-on-surface-variant: #b7aedb;
+  --mat-sys-outline: #5b4b99;
+  --mat-sys-outline-variant: #2a2250;
+  --mat-sys-scrim: #000000;
+  --mat-sys-shadow: #000000;
+  --mat-sys-surface-tint: #ff2bd6;
+
+  // primary = hot magenta
+  --mat-sys-primary: #ff4fdc;
+  --mat-sys-on-primary: #2a0023;
+  --mat-sys-primary-container: #5c0a52;
+  --mat-sys-on-primary-container: #ffc4f4;
+  // secondary = electric violet
+  --mat-sys-secondary: #b388ff;
+  --mat-sys-on-secondary: #1c0a4a;
+  --mat-sys-secondary-container: #35208a;
+  --mat-sys-on-secondary-container: #e1d3ff;
+  // tertiary = cyan
+  --mat-sys-tertiary: #00e5ff;
+  --mat-sys-on-tertiary: #00262b;
+  --mat-sys-tertiary-container: #00424b;
+  --mat-sys-on-tertiary-container: #a6f6ff;
+  // error = neon red-pink
+  --mat-sys-error: #ff4d6d;
+  --mat-sys-on-error: #2d0010;
+  --mat-sys-error-container: #6b0020;
+  --mat-sys-on-error-container: #ffc9d3;
+  // snackbars etc. (inverse surfaces) stay readable on the dark page
+  --mat-sys-inverse-surface: #f1ecff;
+  --mat-sys-inverse-on-surface: #15102a;
+  --mat-sys-inverse-primary: #b0008f;
+
+  // app tokens (neon)
+  --status-ok: #39ff88;
+  --status-warn: #ffc400;
+  --status-fail: #ff3d6e;
+  --app-header-bg: linear-gradient(90deg, #12061f, #1a0a33 55%, #0b1a2a);
+  --app-header-fg: #f1ecff;
+  --app-header-border: var(--neon-magenta);
+  --glow: 0 0 8px color-mix(in srgb, var(--neon-magenta) 70%, transparent);
+  --glow-strong: 0 0 14px color-mix(in srgb, var(--neon-magenta) 80%, transparent),
+                 0 0 2px var(--neon-magenta);
+  --link-glow: 0 0 6px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+}
+
+// Component-level neon styling (cards, lists, nav, inputs, menus...) lives in neon.scss.
+
+body {
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+  transition: background-color 250ms ease, color 250ms ease; // smooth light <-> dark switch
+}
+
+a { color: var(--mat-sys-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  body { transition: none; }
+}

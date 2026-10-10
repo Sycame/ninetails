@@ -1,0 +1,12 @@
+<div class="layout">
+  <app-header (menuToggle)="drawer.toggle()" />
+  <mat-sidenav-container class="body">
+    <mat-sidenav #drawer [mode]="isMobile() ? 'over' : 'side'" [opened]="!isMobile()" class="nav">
+      <app-navbar (click)="isMobile() && drawer.close()" />
+    </mat-sidenav>
+    <mat-sidenav-content class="content">
+      <router-outlet />
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  <app-footer />
+</div>

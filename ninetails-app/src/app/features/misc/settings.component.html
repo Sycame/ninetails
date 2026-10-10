@@ -1,0 +1,21 @@
+<h1>Settings</h1>
+
+<h3>Application</h3>
+<p>Version: {{ env.appVersion }}</p>
+<p>Data source: <strong>{{ env.useMock ? 'mock JSON (/public/mock)' : env.apiBaseUrl }}</strong></p>
+
+<h3>Configuration baseline</h3>
+@if (config.config$ | async; as c) {
+  <dl>
+    <dt>Version</dt><dd class="mono">{{ c.version }}</dd>
+    <dt>Published</dt><dd>{{ c.publishedAt | date: 'medium' }}</dd>
+    @if (c.description) { <dt>Change</dt><dd>{{ c.description }}</dd> }
+    <dt>Contents</dt>
+    <dd>{{ c.racks.length }} racks · {{ c.vms.length }} VMs · {{ c.environments.length }} environments · {{ c.teams.length }} teams</dd>
+    <dt>Last checked</dt><dd>{{ (config.checkedAt$ | async) ? ((config.checkedAt$ | async) | date: 'mediumTime') : '—' }}</dd>
+  </dl>
+} @else {
+  <p>No baseline loaded yet.</p>
+}
+@if (config.error$ | async; as err) { <p class="err" role="alert">Could not check for updates: {{ err }}</p> }
+<button mat-stroked-button (click)="config.sync()"><mat-icon>sync</mat-icon> Check for updates</button>

@@ -1,0 +1,1096 @@
+{
+  "version": "2026.10.1",
+  "publishedAt": "2026-10-01T06:00:00Z",
+  "description": "Baseline 2026.10.1 (mock)",
+  "racks": [
+    {
+      "id": "rack-a1",
+      "name": "Rack A1",
+      "location": "DC1 / Row A",
+      "heightU": 42,
+      "chassis": [
+        {
+          "id": "ch-a1-blade",
+          "name": "Blade chassis A",
+          "model": "Dell MX7000",
+          "positionU": 30,
+          "sizeU": 4,
+          "columns": 2,
+          "envId": "env-prod",
+          "teamId": "team-platform"
+        },
+        {
+          "id": "ch-a1-micro",
+          "name": "Micro chassis",
+          "model": "Supermicro MicroCloud",
+          "positionU": 24,
+          "sizeU": 1,
+          "columns": 3,
+          "envId": "env-staging",
+          "teamId": "team-apps"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "sw-a1-top",
+          "type": "switch",
+          "name": "sw-a1-top",
+          "model": "Arista 7050",
+          "rackId": "rack-a1",
+          "ports": 48,
+          "positionU": 41,
+          "sizeU": 1,
+          "envId": "env-prod",
+          "teamId": "team-platform"
+        },
+        {
+          "id": "sw-a1-core",
+          "type": "switch",
+          "name": "sw-a1-core",
+          "model": "Arista 7280",
+          "rackId": "rack-a1",
+          "ports": 32,
+          "positionU": 38,
+          "sizeU": 2,
+          "envId": "env-prod",
+          "teamId": "team-platform"
+        },
+        {
+          "id": "srv-a1-01",
+          "type": "server",
+          "name": "srv-a1-01",
+          "model": "Dell MX760c",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-blade",
+          "placement": {
+            "col": 1,
+            "row": 1,
+            "colSpan": 1,
+            "rowSpan": 2
+          },
+          "envId": "env-prod",
+          "teamId": "team-platform",
+          "network": {
+            "hostname": "srv-a1-01.dc1.example.net",
+            "mgmtIp": "10.1.0.10",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.10",
+                "mac": "02:00:0a:01:0a:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.10",
+                "mac": "02:00:0a:01:0a:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.10",
+                "mac": "02:00:0a:01:0a:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-02",
+          "type": "server",
+          "name": "srv-a1-02",
+          "model": "Dell MX760c",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-blade",
+          "placement": {
+            "col": 1,
+            "row": 3,
+            "colSpan": 1,
+            "rowSpan": 2
+          },
+          "envId": "env-prod",
+          "teamId": "team-platform",
+          "network": {
+            "hostname": "srv-a1-02.dc1.example.net",
+            "mgmtIp": "10.1.0.11",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.11",
+                "mac": "02:00:0a:01:0b:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.11",
+                "mac": "02:00:0a:01:0b:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.11",
+                "mac": "02:00:0a:01:0b:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-04",
+          "type": "server",
+          "name": "srv-a1-04",
+          "model": "Dell MX750c",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-blade",
+          "placement": {
+            "col": 2,
+            "row": 1,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-prod",
+          "teamId": "team-platform",
+          "network": {
+            "hostname": "srv-a1-04.dc1.example.net",
+            "mgmtIp": "10.1.0.12",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.12",
+                "mac": "02:00:0a:01:0c:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.12",
+                "mac": "02:00:0a:01:0c:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.12",
+                "mac": "02:00:0a:01:0c:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-05",
+          "type": "server",
+          "name": "srv-a1-05",
+          "model": "Dell MX750c",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-blade",
+          "placement": {
+            "col": 2,
+            "row": 2,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-prod",
+          "teamId": "team-platform",
+          "network": {
+            "hostname": "srv-a1-05.dc1.example.net",
+            "mgmtIp": "10.1.0.13",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.13",
+                "mac": "02:00:0a:01:0d:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.13",
+                "mac": "02:00:0a:01:0d:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.13",
+                "mac": "02:00:0a:01:0d:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-06",
+          "type": "server",
+          "name": "srv-a1-06",
+          "model": "Dell MX750c",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-blade",
+          "placement": {
+            "col": 2,
+            "row": 3,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-ml",
+          "teamId": "team-data",
+          "network": {
+            "hostname": "srv-a1-06.dc1.example.net",
+            "mgmtIp": "10.1.0.14",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.14",
+                "mac": "02:00:0a:01:0e:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.14",
+                "mac": "02:00:0a:01:0e:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.14",
+                "mac": "02:00:0a:01:0e:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-07",
+          "type": "server",
+          "name": "srv-a1-07",
+          "model": "Dell MX750c",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-blade",
+          "placement": {
+            "col": 2,
+            "row": 4,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-ml",
+          "teamId": "team-data",
+          "network": {
+            "hostname": "srv-a1-07.dc1.example.net",
+            "mgmtIp": "10.1.0.15",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.15",
+                "mac": "02:00:0a:01:0f:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.15",
+                "mac": "02:00:0a:01:0f:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.15",
+                "mac": "02:00:0a:01:0f:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-08",
+          "type": "server",
+          "name": "srv-a1-08",
+          "model": "Supermicro 1U",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-micro",
+          "placement": {
+            "col": 1,
+            "row": 1,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-qa3",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-a1-08.dc1.example.net",
+            "mgmtIp": "10.1.0.16",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.16",
+                "mac": "02:00:0a:01:10:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.16",
+                "mac": "02:00:0a:01:10:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.16",
+                "mac": "02:00:0a:01:10:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-09",
+          "type": "server",
+          "name": "srv-a1-09",
+          "model": "Supermicro 1U",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-micro",
+          "placement": {
+            "col": 2,
+            "row": 1,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-pay-sbx",
+          "teamId": "team-payments",
+          "network": {
+            "hostname": "srv-a1-09.dc1.example.net",
+            "mgmtIp": "10.1.0.17",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.17",
+                "mac": "02:00:0a:01:11:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.17",
+                "mac": "02:00:0a:01:11:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.17",
+                "mac": "02:00:0a:01:11:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-10",
+          "type": "server",
+          "name": "srv-a1-10",
+          "model": "Supermicro 1U",
+          "rackId": "rack-a1",
+          "chassisId": "ch-a1-micro",
+          "placement": {
+            "col": 3,
+            "row": 1,
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          "envId": "env-demo",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-a1-10.dc1.example.net",
+            "mgmtIp": "10.1.0.18",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.18",
+                "mac": "02:00:0a:01:12:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.18",
+                "mac": "02:00:0a:01:12:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.18",
+                "mac": "02:00:0a:01:12:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-a1-03",
+          "type": "server",
+          "name": "srv-a1-03",
+          "model": "HPE DL380",
+          "rackId": "rack-a1",
+          "positionU": 10,
+          "sizeU": 2,
+          "envId": "env-staging",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-a1-03.dc1.example.net",
+            "mgmtIp": "10.1.0.19",
+            "gateway": "10.1.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.1.10.19",
+                "mac": "02:00:0a:01:13:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.1.20.19",
+                "mac": "02:00:0a:01:13:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.1.30.19",
+                "mac": "02:00:0a:01:13:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rack-b1",
+      "name": "Rack B1",
+      "location": "DC1 / Row B",
+      "heightU": 48,
+      "chassis": [
+        {
+          "id": "ch-b1-main",
+          "name": "Compute chassis B",
+          "model": "HPE Synergy 12000",
+          "positionU": 34,
+          "sizeU": 6,
+          "columns": 3,
+          "envId": "env-staging",
+          "teamId": "team-apps"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "sw-b1-top",
+          "type": "switch",
+          "name": "sw-b1-top",
+          "model": "Cisco Nexus 9300",
+          "rackId": "rack-b1",
+          "ports": 48,
+          "positionU": 47,
+          "sizeU": 1,
+          "envId": "env-staging",
+          "teamId": "team-apps"
+        },
+        {
+          "id": "sw-b1-core",
+          "type": "switch",
+          "name": "sw-b1-core",
+          "model": "Cisco Nexus 9500",
+          "rackId": "rack-b1",
+          "ports": 48,
+          "positionU": 44,
+          "sizeU": 2,
+          "envId": "env-staging",
+          "teamId": "team-apps"
+        },
+        {
+          "id": "srv-b1-01",
+          "type": "server",
+          "name": "srv-b1-01",
+          "model": "HPE SY480",
+          "rackId": "rack-b1",
+          "chassisId": "ch-b1-main",
+          "placement": {
+            "col": 1,
+            "row": 1,
+            "colSpan": 1,
+            "rowSpan": 6
+          },
+          "envId": "env-staging",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-b1-01.dc1.example.net",
+            "mgmtIp": "10.2.0.20",
+            "gateway": "10.2.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.2.10.20",
+                "mac": "02:00:0a:02:14:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.2.20.20",
+                "mac": "02:00:0a:02:14:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.2.30.20",
+                "mac": "02:00:0a:02:14:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-b1-03",
+          "type": "server",
+          "name": "srv-b1-03",
+          "model": "HPE SY660 (wide)",
+          "rackId": "rack-b1",
+          "chassisId": "ch-b1-main",
+          "placement": {
+            "col": 2,
+            "row": 1,
+            "colSpan": 2,
+            "rowSpan": 2
+          },
+          "envId": "env-staging",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-b1-03.dc1.example.net",
+            "mgmtIp": "10.2.0.21",
+            "gateway": "10.2.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.2.10.21",
+                "mac": "02:00:0a:02:15:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.2.20.21",
+                "mac": "02:00:0a:02:15:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.2.30.21",
+                "mac": "02:00:0a:02:15:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-b1-04",
+          "type": "server",
+          "name": "srv-b1-04",
+          "model": "HPE SY480",
+          "rackId": "rack-b1",
+          "chassisId": "ch-b1-main",
+          "placement": {
+            "col": 2,
+            "row": 3,
+            "colSpan": 1,
+            "rowSpan": 4
+          },
+          "envId": "env-staging",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-b1-04.dc1.example.net",
+            "mgmtIp": "10.2.0.22",
+            "gateway": "10.2.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.2.10.22",
+                "mac": "02:00:0a:02:16:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.2.20.22",
+                "mac": "02:00:0a:02:16:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.2.30.22",
+                "mac": "02:00:0a:02:16:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-b1-05",
+          "type": "server",
+          "name": "srv-b1-05",
+          "model": "HPE SY480",
+          "rackId": "rack-b1",
+          "chassisId": "ch-b1-main",
+          "placement": {
+            "col": 3,
+            "row": 3,
+            "colSpan": 1,
+            "rowSpan": 4
+          },
+          "envId": "env-staging",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-b1-05.dc1.example.net",
+            "mgmtIp": "10.2.0.23",
+            "gateway": "10.2.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.2.10.23",
+                "mac": "02:00:0a:02:17:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.2.20.23",
+                "mac": "02:00:0a:02:17:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.2.30.23",
+                "mac": "02:00:0a:02:17:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-b1-02",
+          "type": "server",
+          "name": "srv-b1-02",
+          "model": "Dell R650",
+          "rackId": "rack-b1",
+          "positionU": 20,
+          "sizeU": 1,
+          "envId": "env-legacy",
+          "teamId": "team-apps",
+          "network": {
+            "hostname": "srv-b1-02.dc1.example.net",
+            "mgmtIp": "10.2.0.24",
+            "gateway": "10.2.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.2.10.24",
+                "mac": "02:00:0a:02:18:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.2.20.24",
+                "mac": "02:00:0a:02:18:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.2.30.24",
+                "mac": "02:00:0a:02:18:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rack-c1",
+      "name": "Rack C1",
+      "location": "DC2 / Row A",
+      "heightU": 24,
+      "chassis": [],
+      "nodes": [
+        {
+          "id": "sw-c1-01",
+          "type": "switch",
+          "name": "sw-c1-01",
+          "model": "Juniper EX4300",
+          "rackId": "rack-c1",
+          "ports": 48,
+          "positionU": 23,
+          "sizeU": 1,
+          "envId": "env-blue",
+          "teamId": "team-platform"
+        },
+        {
+          "id": "srv-c1-01",
+          "type": "server",
+          "name": "srv-c1-01",
+          "model": "Dell R750",
+          "rackId": "rack-c1",
+          "positionU": 12,
+          "sizeU": 2,
+          "envId": "env-blue",
+          "teamId": "team-platform",
+          "network": {
+            "hostname": "srv-c1-01.dc1.example.net",
+            "mgmtIp": "10.3.0.25",
+            "gateway": "10.3.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.3.10.25",
+                "mac": "02:00:0a:03:19:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.3.20.25",
+                "mac": "02:00:0a:03:19:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.3.30.25",
+                "mac": "02:00:0a:03:19:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "srv-c1-02",
+          "type": "server",
+          "name": "srv-c1-02",
+          "model": "Dell R750",
+          "rackId": "rack-c1",
+          "positionU": 10,
+          "sizeU": 2,
+          "envId": "env-green",
+          "teamId": "team-platform",
+          "network": {
+            "hostname": "srv-c1-02.dc1.example.net",
+            "mgmtIp": "10.3.0.26",
+            "gateway": "10.3.10.1",
+            "interfaces": [
+              {
+                "name": "eth0",
+                "purpose": "data",
+                "ipAddress": "10.3.10.26",
+                "mac": "02:00:0a:03:1a:01",
+                "vlan": 100,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth1",
+                "purpose": "storage",
+                "ipAddress": "10.3.20.26",
+                "mac": "02:00:0a:03:1a:02",
+                "vlan": 200,
+                "speedGbps": 25
+              },
+              {
+                "name": "eth2",
+                "purpose": "backup",
+                "ipAddress": "10.3.30.26",
+                "mac": "02:00:0a:03:1a:03",
+                "vlan": 300,
+                "speedGbps": 10
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "vms": [
+    {
+      "id": "vm-1",
+      "name": "api-prod-1",
+      "hostId": "srv-a1-01",
+      "envId": "env-prod",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-2",
+      "name": "db-prod-1",
+      "hostId": "srv-a1-02",
+      "envId": "env-prod",
+      "os": "Debian 12"
+    },
+    {
+      "id": "vm-3",
+      "name": "api-stg-1",
+      "hostId": "srv-a1-03",
+      "envId": "env-staging",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-4",
+      "name": "old-app",
+      "hostId": "srv-b1-02",
+      "envId": "env-legacy",
+      "os": "CentOS 7"
+    },
+    {
+      "id": "vm-5",
+      "name": "cache-prod-1",
+      "hostId": "srv-a1-04",
+      "envId": "env-prod",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-6",
+      "name": "web-stg-1",
+      "hostId": "srv-b1-04",
+      "envId": "env-staging",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-7",
+      "name": "web-stg-2",
+      "hostId": "srv-b1-05",
+      "envId": "env-staging",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-8",
+      "name": "queue-prod-1",
+      "hostId": "srv-a1-02",
+      "envId": "env-prod",
+      "os": "Debian 12"
+    },
+    {
+      "id": "vm-9",
+      "name": "web-blue-1",
+      "hostId": "srv-c1-01",
+      "envId": "env-blue",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-10",
+      "name": "web-green-1",
+      "hostId": "srv-c1-02",
+      "envId": "env-green",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-11",
+      "name": "app-green-2",
+      "hostId": "srv-c1-01",
+      "envId": "env-green",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-12",
+      "name": "pay-api-1",
+      "hostId": "srv-a1-09",
+      "envId": "env-pay-sbx",
+      "os": "Debian 12"
+    },
+    {
+      "id": "vm-13",
+      "name": "gpu-job-1",
+      "hostId": "srv-a1-06",
+      "envId": "env-ml",
+      "os": "Ubuntu 22.04"
+    },
+    {
+      "id": "vm-14",
+      "name": "qa-web",
+      "hostId": "srv-a1-08",
+      "envId": "env-qa3",
+      "os": "Ubuntu 24.04"
+    },
+    {
+      "id": "vm-15",
+      "name": "api-prod-2",
+      "hostId": "srv-a1-01",
+      "envId": "env-prod",
+      "os": "Ubuntu 24.04"
+    }
+  ],
+  "environments": [
+    {
+      "id": "env-prod",
+      "name": "prod",
+      "description": "Customer-facing production",
+      "teamId": "team-platform"
+    },
+    {
+      "id": "env-blue",
+      "name": "blue",
+      "description": "Blue half of the blue/green pair",
+      "teamId": "team-platform"
+    },
+    {
+      "id": "env-green",
+      "name": "green",
+      "description": "Green half of the blue/green pair",
+      "teamId": "team-platform"
+    },
+    {
+      "id": "env-staging",
+      "name": "staging",
+      "description": "Pre-production testing",
+      "teamId": "team-apps"
+    },
+    {
+      "id": "env-qa3",
+      "name": "qa-3",
+      "description": "Third QA environment",
+      "teamId": "team-apps"
+    },
+    {
+      "id": "env-demo",
+      "name": "demo_2026",
+      "description": "Sales demo, torn down after the conference",
+      "teamId": "team-apps"
+    },
+    {
+      "id": "env-legacy",
+      "name": "legacy",
+      "description": "Decommissioning soon",
+      "teamId": "team-apps"
+    },
+    {
+      "id": "env-pay-sbx",
+      "name": "Payments Sandbox (EU)",
+      "description": "Partner integration sandbox",
+      "teamId": "team-payments"
+    },
+    {
+      "id": "env-ml",
+      "name": "ML training / GPU pool",
+      "description": "Shared training capacity",
+      "teamId": "team-data"
+    },
+    {
+      "id": "env-spare",
+      "name": "spare-capacity",
+      "description": "Reserved, nothing assigned yet",
+      "teamId": "team-data"
+    }
+  ],
+  "teams": [
+    {
+      "id": "team-platform",
+      "name": "Platform",
+      "contact": "platform@example.com"
+    },
+    {
+      "id": "team-apps",
+      "name": "Applications",
+      "contact": "apps@example.com"
+    },
+    {
+      "id": "team-payments",
+      "name": "Payments",
+      "contact": "payments@example.com"
+    },
+    {
+      "id": "team-data",
+      "name": "Data & ML",
+      "contact": "data@example.com"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+<footer>
+  <span>v{{ version }}</span>
+  <span>Last sync: {{ (racks.lastSync$ | async) ? (racks.lastSync$ | async | date: 'mediumTime') : '—' }}</span>
+  <span class="health">Health: <app-status-badge [status]="(racks.health$ | async) ?? 'OK'" /></span>
+  <!-- Live connection: updates are pushed while "Live"; otherwise data is refreshed by polling. -->
+  @let conn = live.state$ | async;
+  <span class="conn" [class]="'conn ' + conn" [attr.title]="connTitle[conn ?? 'offline']">
+    <span class="dot" aria-hidden="true"></span>{{ connLabel[conn ?? 'offline'] }}
+  </span>
+  <span class="spacer"></span>
+  <span>© {{ year }} Ninetails</span>
+</footer>

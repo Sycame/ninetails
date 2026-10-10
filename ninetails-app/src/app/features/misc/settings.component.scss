@@ -1,0 +1,4 @@
+dl { display: grid; grid-template-columns: 120px 1fr; gap: 6px 8px; max-width: 640px; }
+dt { color: var(--mat-sys-on-surface-variant); } dd { margin: 0; }
+.mono { font-family: ui-monospace, Consolas, monospace; }
+.err { color: var(--mat-sys-error); }

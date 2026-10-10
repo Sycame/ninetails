@@ -1,0 +1,174 @@
+// Colors come from Material system variables, which already flip with the header theme toggle
+// (color-scheme on <html>). The extra rack tokens below use light-dark() for the same reason.
+:host {
+  --ru-h: 36px;                      // height of one rack unit (tall enough for name + model lines)
+  --rack-rail: light-dark(#9b7bff, #7a2bd6);   // neon violet rails
+  --rack-bg: light-dark(#f1ecff, #05040a);
+  --rack-ru-text: var(--mat-sys-on-surface-variant);
+  --rack-line: color-mix(in srgb, var(--mat-sys-outline) 60%, transparent);   // dotted row separators
+  --ruler-w: 44px;                   // width of the RU index column
+  --rail-w: 18px;                    // width of the right mounting rail
+  --anim: 180ms cubic-bezier(0.2, 0, 0, 1);
+  display: block;
+}
+
+.container { min-height: 70vh; background: transparent; }
+mat-drawer { width: 360px; max-width: 90vw; padding: 16px; }
+.err { color: var(--mat-sys-error); }
+.issues { margin: 0 0 12px; padding: 8px 8px 8px 28px; color: var(--mat-sys-on-error-container);
+          background: var(--mat-sys-error-container); border-left: 4px solid var(--mat-sys-error); }
+
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+  // The outlined field's floating label sits half above its border; without this top padding the
+  // scrolling drawer content clips the upper half of the "Rack" label.
+  padding-top: 12px;
+  .picker { width: 220px; }
+  .meta { color: var(--mat-sys-on-surface-variant); }
+}
+
+// (the neon heading bar for h1/h2 comes from the global neon.scss)
+h2 small { font-weight: 400; color: var(--mat-sys-on-surface-variant); font-size: 0.6em; }
+
+// ---- rack swap: new rack slides in from the side it "came from" --------------------------
+.stage { padding-bottom: 48px; /* breathing room above the footer when scrolled to the end */ animation: slide-from-right 260ms cubic-bezier(0.2, 0, 0, 1) both; }
+.stage.from-prev { animation-name: slide-from-left; }
+@keyframes slide-from-right { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+@keyframes slide-from-left { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: none; } }
+
+// ---- rack cabinet ---------------------------------------------------------------------
+// Layout: top plate / grid [RU index | equipment | mounting rail] / bottom plate with feet.
+.cabinet {
+  width: min(100%, 780px);           // wide enough for 3-column chassis to show full name + model
+  background: var(--rack-bg);
+  border: 6px solid var(--rack-rail);
+  transition: background-color var(--anim);
+}
+
+// Top and bottom plates share the grid's column sizes so the ruler header lines up with the numbers.
+.cap {
+  display: grid; grid-template-columns: var(--ruler-w) 1fr var(--rail-w); align-items: center;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--rack-rail) 35%, var(--rack-bg)), var(--rack-bg));
+  font: var(--mat-sys-label-small); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rack-ru-text);
+  &.top { height: 28px; border-bottom: 2px solid var(--rack-rail); }
+  &.bottom { height: 16px; border-top: 2px solid var(--rack-rail); background: color-mix(in srgb, var(--rack-rail) 25%, var(--rack-bg)); }
+  .ruler-head { text-align: center; color: var(--neon-magenta); font-weight: 500; }
+  .plate { padding-left: 12px; }
+  // little square feet along the bottom plate
+  .feet { height: 100%; background: repeating-linear-gradient(90deg, transparent 0 24px, var(--rack-rail) 24px 48px); opacity: 0.45; }
+}
+
+.rack {
+  display: grid;
+  grid-template-columns: var(--ruler-w) 1fr var(--rail-w);   // RU index | equipment | mounting rail
+}
+
+// RU index: its own column, styled like a ruler with a dotted line under every number.
+.ru {
+  grid-column: 1; display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--rack-rail) 14%, var(--rack-bg));
+  border-right: 2px solid var(--rack-rail);
+  border-bottom: 1px dotted var(--rack-line);
+  font: var(--mat-sys-label-medium); font-variant-numeric: tabular-nums; color: var(--rack-ru-text);
+  user-select: none;
+}
+
+// Empty slot behind the equipment: only draws the dotted separator between rows.
+.slot { grid-column: 2; border-bottom: 1px dotted var(--rack-line); }
+
+// Right mounting rail with a square hole in every RU.
+.rail {
+  grid-column: 3; position: relative;
+  background: color-mix(in srgb, var(--rack-rail) 22%, var(--rack-bg));
+  border-left: 2px solid var(--rack-rail);
+  border-bottom: 1px dotted var(--rack-line);
+  &::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    background: var(--rack-bg); box-shadow: inset 0 0 0 1px var(--rack-rail);
+  }
+}
+
+// Equipment sits on top of the slots (same grid cells, later in the DOM = painted above).
+.standalone, .chassis { grid-column: 2; min-height: 0; margin: 2px 6px; }
+.standalone { display: grid; }
+.chassis {
+  display: grid; gap: 2px; padding: 2px; border-radius: 0;
+  background: color-mix(in srgb, var(--mat-sys-outline) 55%, transparent);
+  border: 1px solid var(--mat-sys-outline);
+}
+
+// ---- nodes ----------------------------------------------------------------------------
+.node {
+  display: flex; align-items: center; gap: 6px; min-height: 0; min-width: 0; overflow: hidden;
+  border: 0; border-radius: 0; padding: 0 8px; cursor: pointer; text-align: left; font: inherit;
+  background: var(--mat-sys-surface-container-high); color: var(--mat-sys-on-surface);
+  border-left: 4px solid transparent;
+  // transform/box-shadow/background only: cheap to animate
+  transition: transform var(--anim), box-shadow var(--anim), background-color 300ms ease, outline-color 300ms ease;
+  outline: 2px solid transparent; outline-offset: -2px;
+
+  &.switch { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
+  &.s-WARN { border-left-color: var(--status-warn); }
+  &.s-FAIL { border-left-color: var(--status-fail); }
+
+  // hover: slight lift
+  &:hover { transform: scale(1.02); box-shadow: 0 2px 8px rgb(0 0 0 / 0.35); z-index: 2; position: relative; }
+  &:focus-visible { outline-color: var(--mat-sys-primary); }
+
+  // selection: color fade + outline
+  &.selected {
+    background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container);
+    outline-color: var(--mat-sys-primary);
+  }
+
+  // name on top, model underneath in smaller, dimmer text; each line truncates with an ellipsis
+  .label { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+  .name, .model { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .model { font-size: 10px; opacity: 0.75; }
+  mat-icon { flex: none; }
+  position: relative;
+
+  // status LED (square, like the rest of the UI)
+  .led { flex: none; width: 6px; height: 6px; background: var(--status-ok); box-shadow: 0 0 6px var(--status-ok); }
+  &.s-WARN .led { background: var(--status-warn); box-shadow: 0 0 6px var(--status-warn); }
+  &.s-FAIL .led { background: var(--status-fail); box-shadow: 0 0 6px var(--status-fail); animation: led-pulse 1.4s ease-in-out infinite; }
+
+  // faceplate details: vents on servers, a port row on switches (decorative, ignore pointer events)
+  &::after { content: ''; position: absolute; pointer-events: none; opacity: 0.16; }
+  &.server::after {
+    top: 22%; bottom: 22%; right: 48px; width: 44px;
+    background: repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 6px);
+  }
+  &.switch::after {
+    top: 34%; bottom: 34%; right: 48px; width: 96px; opacity: 0.35;
+    background: repeating-linear-gradient(90deg, currentColor 0 7px, transparent 7px 10px);
+  }
+}
+@keyframes led-pulse { 50% { opacity: 0.35; } }
+
+// Details content fades in after the drawer slides open.
+.panel { display: block; animation: fade-in 280ms 120ms ease both; }
+@keyframes fade-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+
+// Respect the OS "reduce motion" setting.
+@media (prefers-reduced-motion: reduce) {
+  .stage, .panel { animation: none; }
+  .node { transition: none; &:hover { transform: none; } .led { animation: none !important; } }
+}
+
+// Rack-only tweak driven by the theme class set from ThemeService.theme$ (host binding).
+// Neon look (both themes): glowing rack frame, chassis edges and nodes. Glow strength comes from the
+// --glow tokens and the light-dark() inner shadow below, so light and dark share one rule set.
+:host {
+  .cabinet { box-shadow: 0 0 16px color-mix(in srgb, var(--rack-rail) 55%, transparent),
+                      inset 0 0 18px light-dark(rgb(106 61 232 / 0.12), rgb(0 0 0 / 0.8)); }
+  .chassis { border-color: var(--neon-violet); box-shadow: 0 0 6px color-mix(in srgb, var(--neon-violet) 50%, transparent); }
+  .node { border: 1px solid color-mix(in srgb, var(--mat-sys-outline) 70%, transparent); border-left-width: 4px; }
+  .node.switch { border-color: var(--neon-cyan); }
+  .node.s-OK { border-left-color: var(--status-ok); }
+  .node.s-WARN { border-left-color: var(--status-warn); box-shadow: 0 0 6px var(--status-warn); }
+  .node.s-FAIL { border-left-color: var(--status-fail); box-shadow: 0 0 8px var(--status-fail); }
+  .node:hover { box-shadow: 0 0 10px var(--neon-violet); }
+  .node.selected { box-shadow: var(--glow-strong); border-color: var(--neon-magenta); }
+}

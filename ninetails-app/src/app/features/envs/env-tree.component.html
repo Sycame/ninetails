@@ -1,0 +1,74 @@
+@let s = summary();
+
+<h3>Servers ({{ s.hosts.length }})</h3>
+@for (h of s.hosts; track h.server.id) {
+  @if (h.vms.length) {
+    <!-- A server with VMs expands to show them. -->
+    <mat-expansion-panel class="host">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <app-status-badge [status]="h.server.status" [compact]="true" />
+          <span class="name">{{ h.server.name }}</span>
+        </mat-panel-title>
+        <mat-panel-description>
+          <span class="model">{{ h.server.model }}</span>
+          <span class="count">{{ h.vms.length }} VM{{ h.vms.length === 1 ? '' : 's' }}</span>
+          <a mat-icon-button [routerLink]="['/node', h.server.id]" (click)="$event.stopPropagation()"
+             [attr.aria-label]="'View ' + h.server.name + ' in racks'" matTooltip="View in racks">
+            <mat-icon>dns</mat-icon>
+          </a>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      @for (v of h.vms; track v.id) {
+        <div class="row vm">
+          <app-status-badge [status]="v.status" [compact]="true" />
+          <mat-icon class="kind" aria-hidden="true">deployed_code</mat-icon>
+          <span class="name">{{ v.name }}</span>
+          <span class="muted">{{ v.os }}</span>
+        </div>
+      }
+    </mat-expansion-panel>
+  } @else {
+    <!-- No VMs: same look, nothing to expand. -->
+    <div class="row host-plain">
+      <app-status-badge [status]="h.server.status" [compact]="true" />
+      <span class="name">{{ h.server.name }}</span>
+      <span class="spacer"></span>
+      <span class="muted model">{{ h.server.model }}</span>
+      <a mat-icon-button [routerLink]="['/node', h.server.id]"
+         [attr.aria-label]="'View ' + h.server.name + ' in racks'" matTooltip="View in racks">
+        <mat-icon>dns</mat-icon>
+      </a>
+    </div>
+  }
+} @empty {
+  <p class="muted">No servers in this environment.</p>
+}
+
+<h3>Switches ({{ s.switches.length }})</h3>
+@for (n of s.switches; track n.id) {
+  <div class="row">
+    <app-status-badge [status]="n.status" [compact]="true" />
+    <span class="name">{{ n.name }}</span>
+    <span class="spacer"></span>
+    <span class="muted model">{{ n.model }}</span>
+    <a mat-icon-button [routerLink]="['/node', n.id]" [attr.aria-label]="'View ' + n.name + ' in racks'" matTooltip="View in racks">
+      <mat-icon>hub</mat-icon>
+    </a>
+  </div>
+} @empty {
+  <p class="muted">No switches in this environment.</p>
+}
+
+@if (s.foreignVms.length) {
+  <h3>VMs on other environments' hardware ({{ s.foreignVms.length }})</h3>
+  @for (f of s.foreignVms; track f.vm.id) {
+    <div class="row vm">
+      <app-status-badge [status]="f.vm.status" [compact]="true" />
+      <mat-icon class="kind" aria-hidden="true">deployed_code</mat-icon>
+      <span class="name">{{ f.vm.name }}</span>
+      <span class="muted">{{ f.vm.os }} · hosted on {{ f.hostName }}</span>
+    </div>
+  }
+}

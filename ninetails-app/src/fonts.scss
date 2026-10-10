@@ -1,0 +1,56 @@
+// Self-hosted fonts - the app must work with NO internet access, so nothing is loaded from Google.
+// Font files live in src/fonts/ and are bundled by the Angular build (hashed + copied to the output).
+//
+//  - Material Symbols Outlined: all icons (<mat-icon>name</mat-icon>), variable font, weights 100-700.
+//    Source: https://github.com/google/material-design-icons (Apache 2.0, see fonts/LICENSE-material-symbols.txt)
+//  - Roboto: UI text, weights 300/400/500, latin + latin-ext (SIL OFL 1.1, see fonts/LICENSE-roboto.txt)
+//
+// To update: npm i --no-save material-symbols @fontsource/roboto, copy the .woff2 files over, uninstall.
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block; // avoid showing icon names as text while the font loads
+  src: url('./fonts/material-symbols-outlined.woff2') format('woff2');
+}
+
+// Same class Angular Material's <mat-icon> uses (see setDefaultFontSetClass in app.config.ts).
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga'; // ligatures turn the text "dns" into the dns icon
+}
+
+$latin: 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
+$latin-ext: 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF';
+
+@each $weight in (300, 400, 500) {
+  @font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-display: swap;
+    font-weight: $weight;
+    src: url('./fonts/roboto-latin-ext-#{$weight}-normal.woff2') format('woff2');
+    unicode-range: #{$latin-ext};
+  }
+  @font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-display: swap;
+    font-weight: $weight;
+    src: url('./fonts/roboto-latin-#{$weight}-normal.woff2') format('woff2');
+    unicode-range: #{$latin};
+  }
+}

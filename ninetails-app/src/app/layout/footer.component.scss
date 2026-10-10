@@ -1,0 +1,10 @@
+footer { display: flex; gap: 24px; align-items: center; padding: 6px 16px; font-size: 12px;
+         border-top: 1px solid var(--neon-violet); background: var(--mat-sys-surface-container-low);
+         box-shadow: 0 -2px 10px color-mix(in srgb, var(--neon-violet) 30%, transparent); }
+.spacer { flex: 1; }
+.health { display: inline-flex; align-items: center; gap: 4px; }
+.conn { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; background: var(--status-warn); }
+.conn.live .dot { background: var(--status-ok); box-shadow: 0 0 6px var(--status-ok); }
+.conn.offline .dot { background: var(--status-fail); }
+@media (max-width: 600px) { footer { gap: 12px; } }

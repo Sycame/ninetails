@@ -1,0 +1,5 @@
+.badge { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.s-OK { color: var(--status-ok); }
+.s-WARN { color: var(--status-warn); }
+.s-FAIL { color: var(--status-fail); }

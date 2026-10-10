@@ -1,0 +1,15 @@
+<h1>Deployments</h1>
+<mat-list>
+  @for (d of deployer.history$ | async; track d.id) {
+    <mat-list-item>
+      <mat-icon matListItemIcon [class]="'st-' + d.status" [attr.aria-label]="d.status">{{ icons[d.status] }}</mat-icon>
+      <span matListItemTitle>{{ d.envName }} · {{ d.status }}@if (d.message) { — {{ d.message }} }</span>
+      <span matListItemLine>
+        {{ d.startedBy }} · {{ d.startedAt | date: 'medium' }}
+        @if (d.pipelineUrl) { · <a [href]="d.pipelineUrl" target="_blank" rel="noopener">pipeline</a> }
+      </span>
+    </mat-list-item>
+  } @empty {
+    <p>No deployments yet. Trigger one from an environment.</p>
+  }
+</mat-list>

@@ -1,0 +1,65 @@
+<h1>Environments</h1>
+
+<div class="toolbar" role="search">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+    <mat-label>Search environments, servers, VMs</mat-label>
+    <input matInput type="search" [value]="search()" (input)="search.set($any($event.target).value)" />
+    <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="team">
+    <mat-label>Team</mat-label>
+    <mat-select [value]="team() ?? ''" (selectionChange)="setTeam($event.value)">
+      <mat-option value="">All teams</mat-option>
+      @for (t of teams(); track t.id) { <mat-option [value]="t.id">{{ t.name }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-button-toggle-group [value]="grouped() ? 'team' : 'flat'" (change)="grouped.set($event.value === 'team')" aria-label="Layout">
+    <mat-button-toggle value="team"><mat-icon>groups</mat-icon> By team</mat-button-toggle>
+    <mat-button-toggle value="flat"><mat-icon>list</mat-icon> All</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <span class="spacer"></span>
+  <button mat-stroked-button (click)="expandAll()"><mat-icon>unfold_more</mat-icon> Expand all</button>
+  <button mat-stroked-button (click)="open.set(emptySet)"><mat-icon>unfold_less</mat-icon> Collapse all</button>
+</div>
+
+<p class="muted" aria-live="polite">{{ visibleCount() }} of {{ all().length }} environments</p>
+
+@for (g of groups(); track g.key) {
+  <section class="group">
+    @if (g.team !== null || grouped()) {
+      <h2>{{ g.title }} <small>{{ g.envs.length }}</small></h2>
+    }
+
+    @for (s of g.envs; track s.env.id) {
+      <mat-expansion-panel [expanded]="open().has(s.env.id)"
+                           (opened)="toggle(s.env.id, true)" (closed)="toggle(s.env.id, false)"
+                           class="env" [attr.data-status]="s.status">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <app-status-badge [status]="s.status" [compact]="true" />
+            <span class="env-name">{{ s.env.name }}</span>
+          </mat-panel-title>
+          <mat-panel-description>
+            <span class="team-tag"><mat-icon aria-hidden="true">groups</mat-icon> {{ s.team?.name ?? 'No team' }}</span>
+            <span class="counts">{{ s.servers.length }} servers · {{ s.switches.length }} switches · {{ s.vms.length }} VMs</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <!-- Rendered only when first opened, so hundreds of environments stay cheap. -->
+        <ng-template matExpansionPanelContent>
+          @if (s.env.description) { <p class="desc">{{ s.env.description }}</p> }
+          <div class="actions">
+            <app-deploy-button [envId]="s.env.id" [envName]="s.env.name" />
+            <a mat-button [routerLink]="['/envs', s.env.id]"><mat-icon>open_in_new</mat-icon> Open page</a>
+          </div>
+          <app-env-tree [summary]="s" />
+        </ng-template>
+      </mat-expansion-panel>
+    }
+  </section>
+} @empty {
+  <p>No environments match.</p>
+}

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" class="dark-theme">
+  <head>
+    <meta charset="utf-8" />
+    <title>NinetailsApp</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" sizes="any" href="favicon.ico" />
+    <!-- Dark is the default (class above). If the user previously chose light, switch before first paint to avoid a flash.
+         ThemeService takes over once Angular starts. -->
+    <script>
+      try {
+        if (localStorage.getItem('ninetails.theme') === 'light') {
+          document.documentElement.className = 'light-theme';
+        }
+      } catch (e) { /* storage blocked: keep dark */ }
+    </script>
+    <!-- No external font links: Roboto and Material Symbols are self-hosted (src/fonts.scss). -->
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

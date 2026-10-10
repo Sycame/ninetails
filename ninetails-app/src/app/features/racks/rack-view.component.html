@@ -1,0 +1,113 @@
+<mat-drawer-container class="container" autosize>
+  <mat-drawer-content>
+    @if (racks.error$ | async; as err) { <p class="err">{{ err }}</p> }
+
+    @if (vm$ | async; as vm) {
+      <!-- Swap controls: all native buttons / mat-select, so Tab + Enter/Space/arrows just work. -->
+      <div class="toolbar" role="toolbar" aria-label="Rack navigation">
+        <button mat-icon-button (click)="step(-1)" aria-label="Previous rack (Page Up)" matTooltip="Previous (Page Up)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="picker">
+          <mat-label>Rack</mat-label>
+          <mat-select [value]="vm.rack.id" (selectionChange)="onPick($event.value)">
+            @for (r of vm.all; track r.id) {
+              <mat-option [value]="r.id">{{ r.name }} · {{ r.heightU }} RU</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="step(1)" aria-label="Next rack (Page Down)" matTooltip="Next (Page Down)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <span class="meta">{{ vm.index + 1 }} / {{ vm.all.length }} · {{ vm.rack.location }}</span>
+      </div>
+
+      <!-- Layout rule violations (e.g. two servers stacked in one RU) in the inventory data. -->
+      @if (vm.issues.length) {
+        <ul class="issues" role="alert">
+          @for (i of vm.issues; track i) { <li>{{ i }}</li> }
+        </ul>
+      }
+
+      <!--
+        Single-element @for keyed by rack id: when the rack changes Angular destroys and re-creates
+        this block, so the CSS enter animation (slide from the left/right) replays for free.
+      -->
+      @for (v of [vm]; track v.rack.id) {
+        <section class="stage" [class.from-next]="direction() === 'next'" [class.from-prev]="direction() === 'prev'">
+          <h2>{{ v.rack.name }} <small>{{ v.rack.heightU }} RU</small></h2>
+
+          <div class="cabinet">
+          <!-- Top plate: ruler header | location | rack name (same 3 columns as the grid below). -->
+          <div class="cap top" aria-hidden="true">
+            <span class="ruler-head">RU</span>
+            <span class="plate">{{ v.rack.location }}</span>
+            <span></span>
+          </div>
+
+          <!--
+            One grid row per RU, three columns: [RU index] [equipment] [mounting rail].
+            Every row gets an index cell, an empty "slot" cell (draws the dotted row separator) and a
+            rail cell (draws the mounting hole). Equipment is placed on top of the slots by grid-row.
+          -->
+          <div class="rack" [style.grid-template-rows]="'repeat(' + v.rack.heightU + ', var(--ru-h))'">
+            @for (l of v.layout.labels; track l.ru) {
+              <span class="ru" [style.grid-row]="l.row">{{ l.ru }}</span>
+              <span class="slot" [style.grid-row]="l.row" aria-hidden="true"></span>
+              <span class="rail" [style.grid-row]="l.row" aria-hidden="true"></span>
+            }
+
+            @for (item of v.layout.items; track item.id) {
+              @if (item.chassis; as ch) {
+                <!-- Chassis: a nested grid (columns x half-U rows); members sit in their Placement cells. -->
+                <div class="chassis" role="group" [attr.aria-label]="ch.name + ', ' + ch.sizeU + ' U'"
+                     [style.grid-row]="item.row"
+                     [style.grid-template-columns]="'repeat(' + ch.columns + ', 1fr)'"
+                     [style.grid-template-rows]="'repeat(' + ch.sizeU + ', 1fr)'">
+                  @for (m of item.members; track m.node.id) {
+                    <ng-container *ngTemplateOutlet="nodeBtn; context: { $implicit: m, mini: true }" />
+                  }
+                </div>
+              } @else {
+                <div class="standalone" [style.grid-row]="item.row">
+                  <ng-container *ngTemplateOutlet="nodeBtn; context: { $implicit: item.members[0], mini: false }" />
+                </div>
+              }
+            }
+          </div>
+          <div class="cap bottom" aria-hidden="true"><span></span><span class="feet"></span><span></span></div>
+          </div>
+        </section>
+      }
+    }
+
+    <!-- Shared node button (standalone nodes and chassis members look the same). -->
+    <ng-template #nodeBtn let-m let-mini="mini">
+      <button class="node" [class]="'node ' + m.node.type + ' s-' + m.node.status"
+              [class.selected]="m.node.id === selectedId()"
+              [style.grid-row]="m.gridRow || null" [style.grid-column]="m.gridColumn || null"
+              [attr.title]="m.node.name + ' (' + m.node.model + ')'"
+              [attr.aria-label]="m.node.name + ', ' + m.node.type + ', ' + m.node.status"
+              [attr.aria-pressed]="m.node.id === selectedId()"
+              (click)="select(m.node)">
+        <span class="led" aria-hidden="true"></span>
+        <mat-icon aria-hidden="true">{{ m.node.type === 'server' ? 'dns' : 'hub' }}</mat-icon>
+        <span class="label">
+          <span class="name">{{ m.node.name }}</span>
+          <span class="model">{{ m.node.model }}</span>
+        </span>
+        <app-status-badge [status]="m.node.status" [compact]="true" />
+      </button>
+    </ng-template>
+  </mat-drawer-content>
+
+  <!-- Details panel: mat-drawer slides in from the right (built-in, GPU-friendly transform). -->
+  <mat-drawer mode="side" position="end" [opened]="!!selectedId()" (closedStart)="selectedId.set(null)">
+    @if (selectedId(); as nodeId) {
+      <app-node-details class="panel" [id]="nodeId" (closed)="selectedId.set(null)" />
+    }
+  </mat-drawer>
+</mat-drawer-container>

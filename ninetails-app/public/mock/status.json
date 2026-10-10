@@ -1,0 +1,340 @@
+{
+  "asOf": "2026-10-09T08:00:00Z",
+  "nodes": {
+    "sw-a1-top": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ]
+    },
+    "sw-a1-core": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ]
+    },
+    "srv-a1-01": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-02": {
+      "status": "WARN",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        },
+        {
+          "name": "Disk",
+          "status": "WARN",
+          "message": "Disk /data 86% full",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-04": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-05": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-06": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": false
+      }
+    },
+    "srv-a1-07": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-08": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-09": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-10": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-a1-03": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "sw-b1-top": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ]
+    },
+    "sw-b1-core": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ]
+    },
+    "srv-b1-01": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-b1-03": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": false
+      }
+    },
+    "srv-b1-04": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-b1-05": {
+      "status": "WARN",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        },
+        {
+          "name": "Temperature",
+          "status": "WARN",
+          "message": "Inlet 38 C",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-b1-02": {
+      "status": "FAIL",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "FAIL",
+          "message": "No response for 12 min",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": false,
+        "eth1": false,
+        "eth2": false
+      }
+    },
+    "sw-c1-01": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ]
+    },
+    "srv-c1-01": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    },
+    "srv-c1-02": {
+      "status": "OK",
+      "checks": [
+        {
+          "name": "Ping",
+          "status": "OK",
+          "checkedAt": "2026-10-09T08:00:00Z"
+        }
+      ],
+      "links": {
+        "eth0": true,
+        "eth1": true,
+        "eth2": true
+      }
+    }
+  },
+  "vms": {
+    "vm-1": "OK",
+    "vm-2": "WARN",
+    "vm-3": "OK",
+    "vm-4": "FAIL",
+    "vm-5": "OK",
+    "vm-6": "OK",
+    "vm-7": "WARN",
+    "vm-8": "OK",
+    "vm-9": "OK",
+    "vm-10": "OK",
+    "vm-11": "WARN",
+    "vm-12": "OK",
+    "vm-13": "OK",
+    "vm-14": "OK",
+    "vm-15": "OK"
+  }
+}

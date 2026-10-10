@@ -1,0 +1,25 @@
+<mat-toolbar>
+  <button mat-icon-button class="logo-button" (click)="menuToggle.emit()"
+          aria-label="Show or hide the navigation" matTooltip="Show or hide the navigation">
+    <app-logo [size]="28" />
+  </button>
+  <span class="title">Ninetails</span>
+  <span class="spacer"></span>
+
+  <button mat-icon-button (click)="theme.toggle()"
+          [attr.aria-label]="theme.mode() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          [matTooltip]="theme.mode() === 'dark' ? 'Light mode' : 'Dark mode'">
+    <mat-icon>{{ theme.mode() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+
+  @if (auth.user$ | async; as user) {
+    @if (user.avatarUrl && !avatarFailed()) {
+      <img class="avatar" [src]="user.avatarUrl" [alt]="user.name + ' profile picture'" referrerpolicy="no-referrer"
+           (error)="avatarFailed.set(true)" />
+    } @else {
+      <mat-icon aria-hidden="true">account_circle</mat-icon>
+    }
+    <span class="name">{{ user.name }}</span>
+    <button mat-button (click)="auth.logout()"><mat-icon>logout</mat-icon> Logout</button>
+  }
+</mat-toolbar>

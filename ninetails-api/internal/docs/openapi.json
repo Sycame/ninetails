@@ -1,0 +1,577 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Ninetails API",
+    "version": "1.0.0",
+    "description": "REST backend for the Ninetails rack dashboard. The contract is shared with the Angular app (`docs/api.md`).\n\nTwo kinds of data: the **baseline configuration** (`/config`, versioned, immutable once published, no health data) and the **live state** (`/status` plus Server-Sent Events).\n\nAll errors use the envelope `{ \"error\": { \"code\", \"message\" } }`.\n\nWhen the service runs with `NINETAILS_AUTH=dev` no token is needed. With `NINETAILS_AUTH=gitlab` click **Authorize** and paste a GitLab access token."
+  },
+  "servers": [{ "url": "/api/v1" }],
+  "tags": [
+    { "name": "Configuration", "description": "Baselined racks, servers, VMs, environments and teams." },
+    { "name": "Status", "description": "Live health state." },
+    { "name": "Deployments", "description": "Deployment history and triggering." },
+    { "name": "Events", "description": "Server-Sent Events stream." },
+    { "name": "Health", "description": "Liveness." },
+    { "name": "Dev tools", "description": "Development only (`NINETAILS_DEV_TOOLS`, on by default with `NINETAILS_AUTH=dev`; the service refuses to start with it on under gitlab auth). Stand-ins for the monitoring collector, the GitLab pipeline and change management, so the app can be tested end to end. Keep `curl -N http://localhost:8080/api/v1/events` open (or the app) to watch each call arrive as an event. Pause the random simulation first (`/dev/simulation`) so it does not fight your changes." }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/config": {
+      "get": {
+        "tags": ["Configuration"],
+        "operationId": "getConfig",
+        "summary": "Current baseline configuration",
+        "description": "The whole baseline: racks (with chassis and nodes), VMs, environments, teams. Contains no health data. The `ETag` is the version; send it back in `If-None-Match` to get `304`.",
+        "parameters": [
+          { "name": "If-None-Match", "in": "header", "required": false, "schema": { "type": "string" }, "description": "The ETag from an earlier response." }
+        ],
+        "responses": {
+          "200": {
+            "description": "The baseline.",
+            "headers": { "ETag": { "schema": { "type": "string" }, "description": "The quoted version." } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigBaseline" } } }
+          },
+          "304": { "description": "Unchanged since the supplied ETag." },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/config/version": {
+      "get": {
+        "tags": ["Configuration"],
+        "operationId": "getConfigVersion",
+        "summary": "Current baseline version",
+        "description": "Tiny document the app polls to learn whether a newer baseline exists.",
+        "responses": {
+          "200": {
+            "description": "The version.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigVersion" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "tags": ["Status"],
+        "operationId": "getStatus",
+        "summary": "Live status snapshot",
+        "description": "Status, checks and link state per node, and status per VM, keyed by the ids in the baseline. Ids missing here are shown by the app as WARN.",
+        "responses": {
+          "200": {
+            "description": "The snapshot.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatusSnapshot" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/deployments": {
+      "get": {
+        "tags": ["Deployments"],
+        "operationId": "listDeployments",
+        "summary": "Deployment history",
+        "description": "Newest first.",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "maximum": 500, "default": 50 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deployments.",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Deployment" } } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/environments/{envId}/deployments": {
+      "post": {
+        "tags": ["Deployments"],
+        "operationId": "createDeployment",
+        "summary": "Start a deployment",
+        "description": "Queues a pipeline for the environment and answers immediately; progress arrives as `deployment.updated` events. Any signed-in user may deploy to any environment (teams are display labels only). Do not auto-retry.",
+        "parameters": [
+          { "name": "envId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Environment id (not its name)." }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted and queued.",
+            "headers": { "Location": { "schema": { "type": "string" } } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Deployment" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": {
+            "description": "`env_not_found`: no such environment.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "409": {
+            "description": "`env_locked` (environment refuses deployments) or `deploy_in_progress` (one is already running).",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "tags": ["Events"],
+        "operationId": "streamEvents",
+        "summary": "Server-Sent Events stream",
+        "description": "A long-lived `text/event-stream`. Swagger UI cannot display a stream; use `curl -N` or `fetch`. Browsers' `EventSource` cannot send the Authorization header, so read it with `fetch`.\n\nEvents (`event:` name, JSON `data:`):\n\n| event | data |\n|---|---|\n| `config.changed` | `ConfigVersion` - a new baseline was published; pull `/config` |\n| `node.updated` | `NodeUpdate` - partial merge; `checks` replaces the whole list |\n| `vm.updated` | `VMUpdate` - partial merge |\n| `deployment.updated` | `DeploymentUpdate` |\n| `resync` | `{}` - refetch everything |\n\nA `: ping` comment is sent about every 15 s; there is no replay, clients refetch after reconnecting. Unknown event names must be ignored.",
+        "responses": {
+          "200": {
+            "description": "The event stream.",
+            "content": { "text/event-stream": { "schema": { "type": "string" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/dev": {
+      "get": {
+        "tags": ["Dev tools"],
+        "operationId": "devState",
+        "summary": "Dev tools state",
+        "description": "Whether the simulation is paused, the current baseline version and how many apps are connected to the event stream.",
+        "responses": {
+          "200": {
+            "description": "State.",
+            "content": { "application/json": { "schema": { "type": "object", "properties": {
+              "simulationAvailable": { "type": "boolean" }, "simulationPaused": { "type": "boolean" },
+              "configVersion": { "type": "string" }, "eventClients": { "type": "integer" } } } } }
+          }
+        }
+      }
+    },
+    "/dev/simulation": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devSimulation",
+        "summary": "Pause or resume the simulation",
+        "description": "While paused there are no random status flips, and new deployments stay `queued` until you move them with `/dev/deployments/{deploymentId}/update`. 409 `simulation_off` when `NINETAILS_SIMULATE=false` (nothing runs then anyway).",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DevSimulation" }, "example": { "paused": true } } } },
+        "responses": {
+          "200": { "description": "Applied.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DevSimulation" } } } },
+          "409": { "description": "`simulation_off`.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dev/nodes/{nodeId}/update": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devNodeUpdate",
+        "summary": "Change a server or switch's status, checks or links",
+        "description": "Same as the monitoring collector reporting. Partial: only fields present change; `checks` replaces the whole list (`checkedAt` defaults to now). The change is stored (`GET /status`) and pushed as `node.updated`. Get node ids from `GET /config` (racks > nodes).",
+        "parameters": [{ "name": "nodeId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Node id from the baseline." }],
+        "requestBody": { "required": true, "content": { "application/json": {
+          "schema": { "$ref": "#/components/schemas/DevNodeUpdate" },
+          "examples": {
+            "warn": { "summary": "Disk warning", "value": { "status": "WARN", "checks": [ { "name": "Ping", "status": "OK" }, { "name": "Disk", "status": "WARN", "message": "Disk /data 86% full" } ] } },
+            "fail": { "summary": "Host down", "value": { "status": "FAIL", "checks": [ { "name": "Ping", "status": "FAIL", "message": "No response for 12 min" } ] } },
+            "ok": { "summary": "Recovered", "value": { "status": "OK", "checks": [ { "name": "Ping", "status": "OK" } ] } },
+            "link": { "summary": "Interface link down", "value": { "interfaces": [ { "name": "eth0", "linkUp": false } ] } }
+          } } } },
+        "responses": {
+          "200": { "description": "The node's resulting state.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NodeState" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "description": "`node_not_found`.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dev/vms/{vmId}/update": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devVmUpdate",
+        "summary": "Change a VM's status",
+        "description": "Stored in `GET /status` and pushed as `vm.updated`.",
+        "parameters": [{ "name": "vmId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "VM id from the baseline." }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DevVMUpdate" }, "example": { "status": "FAIL" } } } },
+        "responses": {
+          "200": { "description": "Applied.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VMUpdate" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "description": "`vm_not_found`.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dev/deployments/{deploymentId}/update": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devDeploymentUpdate",
+        "summary": "Move a deployment to any state",
+        "description": "Same as the GitLab pipeline webhook. Start one with `POST /environments/{envId}/deployments` (pause the simulation first to keep it `queued`), then walk it through `running` and `succeeded` or `failed`. `finishedAt` is set for the last two. Pushed as `deployment.updated`.",
+        "parameters": [{ "name": "deploymentId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "For example d-1004 (from `GET /deployments`)." }],
+        "requestBody": { "required": true, "content": { "application/json": {
+          "schema": { "$ref": "#/components/schemas/DevDeploymentUpdate" },
+          "examples": {
+            "running": { "value": { "status": "running", "message": "Pipeline running." } },
+            "failed": { "value": { "status": "failed", "message": "Job deploy: exit code 1" } },
+            "succeeded": { "value": { "status": "succeeded", "message": "Pipeline passed." } }
+          } } } },
+        "responses": {
+          "200": { "description": "The deployment.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Deployment" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "description": "`deployment_not_found`.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dev/config/bump": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devConfigBump",
+        "summary": "Publish a new baseline version (same content)",
+        "description": "Republishes the current baseline under a new version, which pushes `config.changed` and makes every app pull `/config` and show \"Configuration updated\". The body is optional; the default version is `dev-<timestamp>`.",
+        "requestBody": { "required": false, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DevBump" }, "example": { "version": "2026.10.3", "description": "CHG-1043: test update" } } } },
+        "responses": {
+          "200": { "description": "The new version.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigVersion" } } } },
+          "409": { "description": "`version_reused`: that version exists with different content.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dev/config": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devConfigPublish",
+        "summary": "Publish a whole new baseline",
+        "description": "Copy the result of `GET /config`, edit it (add a rack, move a server, rename an environment), **change `version`**, and paste it here. It goes through the same validation as a file change: unique ids, resolved references, everything fits its rack. Unknown fields are rejected. 422 `baseline_invalid` lists every problem; the previous baseline stays live. `publishedAt` defaults to now.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigBaseline" } } } },
+        "responses": {
+          "200": { "description": "The new version.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigVersion" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": { "description": "`version_reused`.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "422": { "description": "`baseline_invalid`.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dev/events": {
+      "post": {
+        "tags": ["Dev tools"],
+        "operationId": "devEvent",
+        "summary": "Broadcast a raw event",
+        "description": "Sends `{type, data}` verbatim to every connected app. Use it for `resync` (the app refetches everything), or to check that the app ignores an unknown event name or copes with an odd payload. It does **not** change server state: a made-up `node.updated` is shown by the app but is not in `/status`, so the next refetch reverts it. Use the typed endpoints above to change state.",
+        "requestBody": { "required": true, "content": { "application/json": {
+          "schema": { "$ref": "#/components/schemas/DevEvent" },
+          "examples": {
+            "resync": { "value": { "type": "resync" } },
+            "unknown": { "value": { "type": "something.new", "data": { "x": 1 } } },
+            "config": { "summary": "config.changed with a version that does not exist yet", "value": { "type": "config.changed", "data": { "version": "9.9.9", "publishedAt": "2026-10-10T12:00:00Z" } } }
+          } } } },
+        "responses": {
+          "200": { "description": "Sent.", "content": { "application/json": { "schema": { "type": "object", "properties": { "sent": { "type": "string" }, "clients": { "type": "integer" } } } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/healthz": {
+      "servers": [{ "url": "/" }],
+      "get": {
+        "tags": ["Health"],
+        "operationId": "healthz",
+        "summary": "Liveness",
+        "description": "No authentication. Served at the root, outside `/api/v1`.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Alive.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "configVersion": { "type": "string" },
+                    "eventClients": { "type": "integer", "description": "Connected event streams." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "GitLab access token. Not required when the service runs with NINETAILS_AUTH=dev."
+      }
+    },
+    "responses": {
+      "Unauthenticated": {
+        "description": "`unauthenticated`: missing or expired token.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Forbidden": {
+        "description": "`forbidden`: valid user, not allowed.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "BadRequest": {
+        "description": "`bad_request`: invalid parameter.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string", "example": "env_locked", "description": "For programs." },
+              "message": { "type": "string", "example": "Environment is locked.", "description": "Safe to show to users." }
+            }
+          }
+        }
+      },
+      "Status": { "type": "string", "enum": ["OK", "WARN", "FAIL"] },
+      "DeploymentStatus": { "type": "string", "enum": ["queued", "running", "succeeded", "failed"] },
+      "Team": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "contact": { "type": "string" }
+        }
+      },
+      "Environment": {
+        "type": "object",
+        "required": ["id", "name", "teamId"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string", "description": "Free-form; may contain spaces and symbols." },
+          "description": { "type": "string" },
+          "teamId": { "type": "string" }
+        }
+      },
+      "Placement": {
+        "type": "object",
+        "description": "A node's cells inside a chassis grid (1-based).",
+        "required": ["col", "row", "colSpan", "rowSpan"],
+        "properties": {
+          "col": { "type": "integer" },
+          "row": { "type": "integer" },
+          "colSpan": { "type": "integer" },
+          "rowSpan": { "type": "integer" }
+        }
+      },
+      "Chassis": {
+        "type": "object",
+        "required": ["id", "name", "model", "positionU", "sizeU", "columns"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "model": { "type": "string" },
+          "positionU": { "type": "integer", "description": "Lowest rack unit; 1 is the bottom." },
+          "sizeU": { "type": "integer" },
+          "columns": { "type": "integer" },
+          "envId": { "type": "string" },
+          "teamId": { "type": "string" }
+        }
+      },
+      "NetworkInterface": {
+        "type": "object",
+        "required": ["name", "ipAddress", "mac", "speedGbps"],
+        "properties": {
+          "name": { "type": "string" },
+          "purpose": { "type": "string" },
+          "ipAddress": { "type": "string" },
+          "mac": { "type": "string" },
+          "vlan": { "type": "integer" },
+          "speedGbps": { "type": "integer" }
+        }
+      },
+      "Network": {
+        "type": "object",
+        "required": ["hostname", "interfaces"],
+        "properties": {
+          "hostname": { "type": "string" },
+          "mgmtIp": { "type": "string", "description": "Out-of-band (iDRAC/iLO/BMC)." },
+          "gateway": { "type": "string" },
+          "interfaces": { "type": "array", "items": { "$ref": "#/components/schemas/NetworkInterface" } }
+        }
+      },
+      "Node": {
+        "type": "object",
+        "description": "A server or switch. Standalone nodes use positionU/sizeU; nodes in a chassis use chassisId/placement.",
+        "required": ["id", "type", "name", "model", "rackId"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["server", "switch"] },
+          "name": { "type": "string" },
+          "model": { "type": "string" },
+          "rackId": { "type": "string" },
+          "positionU": { "type": "integer" },
+          "sizeU": { "type": "integer" },
+          "chassisId": { "type": "string" },
+          "placement": { "$ref": "#/components/schemas/Placement" },
+          "envId": { "type": "string" },
+          "teamId": { "type": "string" },
+          "network": { "$ref": "#/components/schemas/Network" },
+          "ports": { "type": "integer", "description": "Switches only." }
+        }
+      },
+      "Rack": {
+        "type": "object",
+        "required": ["id", "name", "location", "heightU", "chassis", "nodes"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "location": { "type": "string" },
+          "heightU": { "type": "integer" },
+          "chassis": { "type": "array", "items": { "$ref": "#/components/schemas/Chassis" } },
+          "nodes": { "type": "array", "items": { "$ref": "#/components/schemas/Node" } }
+        }
+      },
+      "VM": {
+        "type": "object",
+        "required": ["id", "name", "hostId", "os"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "hostId": { "type": "string", "description": "The server it runs on." },
+          "envId": { "type": "string", "description": "May differ from the host's environment." },
+          "os": { "type": "string" }
+        }
+      },
+      "ConfigVersion": {
+        "type": "object",
+        "required": ["version", "publishedAt"],
+        "properties": {
+          "version": { "type": "string", "example": "2026.10.2", "description": "Opaque; changes with every published baseline." },
+          "publishedAt": { "type": "string", "format": "date-time" },
+          "description": { "type": "string", "example": "CHG-1042: add rack C2" }
+        }
+      },
+      "ConfigBaseline": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ConfigVersion" },
+          {
+            "type": "object",
+            "required": ["racks", "vms", "environments", "teams"],
+            "properties": {
+              "racks": { "type": "array", "items": { "$ref": "#/components/schemas/Rack" } },
+              "vms": { "type": "array", "items": { "$ref": "#/components/schemas/VM" } },
+              "environments": { "type": "array", "items": { "$ref": "#/components/schemas/Environment" } },
+              "teams": { "type": "array", "items": { "$ref": "#/components/schemas/Team" } }
+            }
+          }
+        ]
+      },
+      "HealthCheck": {
+        "type": "object",
+        "required": ["name", "status", "checkedAt"],
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/Status" },
+          "message": { "type": "string" },
+          "checkedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "NodeState": {
+        "type": "object",
+        "required": ["status", "checks"],
+        "properties": {
+          "status": { "$ref": "#/components/schemas/Status" },
+          "checks": { "type": "array", "items": { "$ref": "#/components/schemas/HealthCheck" } },
+          "links": {
+            "type": "object",
+            "description": "Interface name to link up.",
+            "additionalProperties": { "type": "boolean" }
+          }
+        }
+      },
+      "StatusSnapshot": {
+        "type": "object",
+        "required": ["asOf", "nodes", "vms"],
+        "properties": {
+          "asOf": { "type": "string", "format": "date-time" },
+          "nodes": { "type": "object", "description": "Keyed by node id.", "additionalProperties": { "$ref": "#/components/schemas/NodeState" } },
+          "vms": { "type": "object", "description": "Keyed by VM id.", "additionalProperties": { "$ref": "#/components/schemas/Status" } }
+        }
+      },
+      "Deployment": {
+        "type": "object",
+        "required": ["id", "envId", "envName", "status", "startedBy", "startedAt"],
+        "properties": {
+          "id": { "type": "string", "example": "d-1004" },
+          "envId": { "type": "string" },
+          "envName": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/DeploymentStatus" },
+          "startedBy": { "type": "string" },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "finishedAt": { "type": "string", "format": "date-time" },
+          "pipelineUrl": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      },
+      "LinkUpdate": {
+        "type": "object",
+        "required": ["name", "linkUp"],
+        "properties": { "name": { "type": "string" }, "linkUp": { "type": "boolean" } }
+      },
+      "NodeUpdate": {
+        "type": "object",
+        "description": "Event `node.updated`. Only the fields present change.",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/Status" },
+          "checks": { "type": "array", "items": { "$ref": "#/components/schemas/HealthCheck" } },
+          "interfaces": { "type": "array", "items": { "$ref": "#/components/schemas/LinkUpdate" } }
+        }
+      },
+      "VMUpdate": {
+        "type": "object",
+        "description": "Event `vm.updated`.",
+        "required": ["id"],
+        "properties": { "id": { "type": "string" }, "status": { "$ref": "#/components/schemas/Status" } }
+      },
+      "DevSimulation": { "type": "object", "required": ["paused"], "properties": { "paused": { "type": "boolean" } } },
+      "DevNodeUpdate": {
+        "type": "object",
+        "description": "Like NodeUpdate, but the id comes from the path.",
+        "properties": {
+          "status": { "$ref": "#/components/schemas/Status" },
+          "checks": { "type": "array", "items": { "type": "object", "required": ["name", "status"], "properties": {
+            "name": { "type": "string" }, "status": { "$ref": "#/components/schemas/Status" },
+            "message": { "type": "string" }, "checkedAt": { "type": "string", "format": "date-time", "description": "Defaults to now." } } } },
+          "interfaces": { "type": "array", "items": { "$ref": "#/components/schemas/LinkUpdate" } }
+        }
+      },
+      "DevVMUpdate": { "type": "object", "required": ["status"], "properties": { "status": { "$ref": "#/components/schemas/Status" } } },
+      "DevDeploymentUpdate": {
+        "type": "object", "required": ["status"],
+        "properties": { "status": { "$ref": "#/components/schemas/DeploymentStatus" }, "message": { "type": "string" } }
+      },
+      "DevBump": {
+        "type": "object",
+        "properties": { "version": { "type": "string", "description": "Default dev-<timestamp>." }, "description": { "type": "string" } }
+      },
+      "DevEvent": {
+        "type": "object", "required": ["type"],
+        "properties": { "type": { "type": "string", "example": "resync" }, "data": { "description": "Any JSON; defaults to {}." } }
+      },
+      "DeploymentUpdate": {
+        "type": "object",
+        "description": "Event `deployment.updated`.",
+        "required": ["id", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/DeploymentStatus" },
+          "finishedAt": { "type": "string", "format": "date-time" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}
