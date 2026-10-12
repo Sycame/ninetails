@@ -195,6 +195,9 @@ Tick each file when done. "Replace" means the old text with the new equivalent f
 - [ ] `package.json` line 2: `"name": "ninetails-app"`
 - [ ] `package-lock.json` lines 2 and 8: both `"name": "ninetails-app"` (edit by hand, or delete the file and run `npm install`
       to regenerate it; if you delete it, versions are re-resolved, so prefer editing the two lines)
+- [ ] `.gitlab-ci.yml` (hidden file, easy to miss): 9 occurrences of `ninetails-app` (the `cd`, cache key path, artifact
+      path and name, `rm`, and the comments). Form C only; they must match the renamed app folder (Section 6). In GitLab,
+      the project's "CI/CD configuration file" setting (`ninetails-app/.gitlab-ci.yml`) must be updated to the new path (Section 7)
 
 **Page title and display text (form A / F)**
 
@@ -223,7 +226,8 @@ than `index.html`, and the other Go files. The remaining app source (styles, com
 
 ### Root folder (`ninetails/`)
 
-- [ ] `DEPLOY-PRODUCTION.md`, `DEV-TESTING.md`: see Section 5\n- [ ] `RENAME-PROJECT.md` (this file), `rename-project.ps1`, `rename-project.sh`: describe the old name on purpose; see Section 9
+- [ ] `DEPLOY-PRODUCTION.md`, `DEV-TESTING.md`: see Section 5
+- [ ] `RENAME-PROJECT.md` (this file), `rename-project.ps1`, `rename-project.sh`: describe the old name on purpose; see Section 9
 
 ---
 
@@ -325,6 +329,7 @@ Not files in this folder, but the name usually appears here too. Decide for each
 |---|---|
 | **Source control** | Repository name, local clone folder and remote URL (this workspace is not under version control yet). |
 | **GitLab** | The GitLab *Application* name (Admin area > Applications) shown on the consent screen at sign-in. The Application ID and redirect URI do not change unless the host name does. |
+| **GitLab CI/CD** | Project Settings > CI/CD > General pipelines > "CI/CD configuration file" is `ninetails-app/.gitlab-ci.yml`; change it to `<slug>-app/.gitlab-ci.yml` after the folder rename, or the pipeline stops running. |
 | **DNS / certificates** | Public host name (`ninetails.yourcompany.com` in the examples) and the certificate issued for it; the redirect URI in the GitLab Application must match the new host: `https://<host>/auth/callback` |
 | **Production VM** | Everything in the server-path rows of Section 5. If the system is already deployed, renaming on the server means: new folders, new service account (or keep the old one), new systemd unit and nginx file, then stop and remove the old ones. It is cleaner to keep the server-side names unchanged and only rename them at the next fresh install. |
 | **API settings file** | `/etc/ninetails-api.env` and its contents. If form E changes, **every variable name in this file must change too**, or the service silently starts with the **defaults**, including `dev` auth (everyone accepted without login). After the rename, check the log shows `auth: validating GitLab tokens` and not `DEV MODE`. |
@@ -382,7 +387,7 @@ Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\node_mod
 - Markdown was chosen for the checklist because it is read by a person, ticks off in any editor and sits next to the
   other guides. The automatic version is the pair of scripts in Section 0, built from the same tables: any new place the
   name appears (a new file, a new setting) is found by them automatically, because they search every text file instead of
-  working from a fixed list. Keep this checklist current anyway; it is the only place that describes the parts outside
+  working from a fixed list. That includes hidden files such as `.gitlab-ci.yml` (a dry run lists it). Keep this checklist current anyway; it is the only place that describes the parts outside
   the repository.
 - After a rename, this file and the two scripts still say `ninetails`. That is intentional: they describe the starting
   point, and the scripts take `-OldName` / `--old-name` for a later rename. Update this file's tables if you want it to
