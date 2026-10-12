@@ -20,7 +20,6 @@ export const routes: Routes = [
       { path: 'racks/:id', loadComponent: () => import('./features/racks/rack-view.component').then((m) => m.RackViewComponent) },
       { path: 'envs', loadComponent: () => import('./features/envs/env-list.component').then((m) => m.EnvListComponent) },
       { path: 'envs/:id', loadComponent: () => import('./features/envs/env-detail.component').then((m) => m.EnvDetailComponent) },
-      { path: 'node/:id', loadComponent: () => import('./features/racks/node-page.component').then((m) => m.NodePageComponent) },
       { path: 'teams', loadComponent: () => import('./features/misc/teams.component').then((m) => m.TeamsComponent) },
       { path: 'deployments', loadComponent: () => import('./features/misc/deployments.component').then((m) => m.DeploymentsComponent) },
       { path: 'settings', loadComponent: () => import('./features/misc/settings.component').then((m) => m.SettingsComponent) },

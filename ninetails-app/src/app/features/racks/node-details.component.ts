@@ -10,9 +10,8 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
  * Node details - read-only monitoring of the PHYSICAL machine (health, model, network). Deployments
- * and VMs are NOT shown here; both live in the Environments tab (env-detail). Used two ways:
- *  - inside the rack view's side drawer (emits `closed` when the X is clicked)
- *  - as the page for route /node/:id
+ * and VMs are NOT shown here; both live in the Environments tab (env-detail).
+ * Used inside the rack view's side drawer (emits `closed` when the X is clicked).
  */
 @Component({
   selector: 'app-node-details',
