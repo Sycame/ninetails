@@ -63,3 +63,57 @@
 } @empty {
   <p>No environments match.</p>
 }
+
+@if (unownedCount()) {
+  <section class="group unowned">
+    <h2>Shared hardware (no environment) <small>{{ unownedCount() }}</small></h2>
+    <p class="muted">These machines belong to no environment. Their VMs may belong to different environments.</p>
+
+    @for (h of unowned().servers; track h.server.id) {
+      <mat-expansion-panel class="env shared" [attr.data-status]="h.status">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <app-status-badge [status]="h.status" [compact]="true" />
+            <span class="env-name">{{ h.server.name }}</span>
+          </mat-panel-title>
+          <mat-panel-description>
+            <span class="team-tag"><mat-icon aria-hidden="true">groups</mat-icon> {{ h.team?.name ?? 'No team' }}</span>
+            <span class="counts">{{ h.vms.length }} VM{{ h.vms.length === 1 ? '' : 's' }} · {{ h.groups.length }} environment{{ h.groups.length === 1 ? '' : 's' }}</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="actions">
+          <a mat-button routerLink="/racks" [queryParams]="{ node: h.server.id }"><mat-icon>dns</mat-icon> View in racks</a>
+        </div>
+        @for (g of h.groups; track g.env?.id ?? '__none') {
+          <h3>
+            @if (g.env) { <a [routerLink]="['/envs', g.env.id]">{{ g.env.name }}</a> }
+            @else { No environment }
+            ({{ g.vms.length }})
+          </h3>
+          @for (v of g.vms; track v.id) {
+            <div class="vm-row">
+              <app-status-badge [status]="v.status" [compact]="true" />
+              <mat-icon class="kind" aria-hidden="true">deployed_code</mat-icon>
+              <span class="vm-name">{{ v.name }}</span>
+              <span class="muted">{{ v.os }}</span>
+            </div>
+          }
+        } @empty {
+          <p class="muted">No VMs on this server.</p>
+        }
+      </mat-expansion-panel>
+    }
+
+    @for (n of unowned().switches; track n.id) {
+      <div class="vm-row switch">
+        <app-status-badge [status]="n.status" [compact]="true" />
+        <mat-icon class="kind" aria-hidden="true">hub</mat-icon>
+        <span class="vm-name">{{ n.name }}</span>
+        <span class="muted">{{ n.model }}</span>
+        <span class="spacer"></span>
+        <a mat-button routerLink="/racks" [queryParams]="{ node: n.id }">View in racks</a>
+      </div>
+    }
+  </section>
+}

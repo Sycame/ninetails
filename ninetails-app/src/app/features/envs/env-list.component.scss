@@ -16,4 +16,9 @@ mat-panel-description { align-items: center; justify-content: space-between; gap
 .counts { color: var(--mat-sys-on-surface-variant); font-size: 12px; white-space: nowrap; }
 .desc { margin-top: 0; color: var(--mat-sys-on-surface-variant); }
 .actions { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.unowned h3 { margin: 12px 0 4px; font-size: 14px; }
+.vm-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; margin-bottom: 2px;
+          background: var(--mat-sys-surface-container-low); border-left: 3px solid var(--mat-sys-outline-variant); }
+.vm-name { font-weight: 500; }
+.kind { font-size: 18px; width: 18px; height: 18px; color: var(--mat-sys-tertiary); }
 @media (max-width: 700px) { .counts { display: none; } }

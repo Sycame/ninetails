@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, combineLatest, map } from 'rxjs';
 import { ConfigService } from './config.service';
-import { EnvSummary, Server, Switch, Team, worstStatus } from './models';
+import { EnvSummary, Server, SharedVmGroup, Switch, Team, UnownedHardware, worstStatus } from './models';
 import { RackService } from './rack.service';
 
 /**
@@ -41,6 +41,39 @@ export class EnvService {
         };
       }),
     ),
+  );
+
+  /**
+   * Servers and switches that belong to no environment. A server here can still host VMs of one or
+   * more environments; those VMs are grouped by environment so the relationship stays visible.
+   */
+  readonly unowned$: Observable<UnownedHardware> = combineLatest([
+    this.envs$, this.teams$, this.racks.nodes$, this.racks.vms$,
+  ]).pipe(
+    map(([envs, teams, nodes, vms]) => {
+      const free = nodes.filter((n) => !n.envId);
+      return {
+        servers: free.filter((n): n is Server => n.type === 'server').map((server) => {
+          const mine = vms.filter((v) => v.hostId === server.id);
+          const groups: SharedVmGroup[] = [];
+          for (const vm of mine) {
+            const env = envs.find((e) => e.id === vm.envId);
+            let g = groups.find((x) => x.env?.id === env?.id);
+            if (!g) groups.push((g = { env, vms: [] }));
+            g.vms.push(vm);
+          }
+          groups.sort((a, b) => (a.env?.name ?? '￿').localeCompare(b.env?.name ?? '￿', undefined, { numeric: true }));
+          return {
+            server,
+            team: teams.find((t) => t.id === server.teamId),
+            status: worstStatus([server.status, ...mine.map((v) => v.status)]),
+            vms: mine,
+            groups,
+          };
+        }),
+        switches: free.filter((n): n is Switch => n.type === 'switch'),
+      };
+    }),
   );
 
   /** Start loading the baseline and the live state (safe to call more than once). */

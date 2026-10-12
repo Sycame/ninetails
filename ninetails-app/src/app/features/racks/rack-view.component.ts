@@ -3,7 +3,7 @@ import { Component, effect, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
-import { RackNode } from '../../core/models';
+import { Rack, RackNode } from '../../core/models';
 import { RackService } from '../../core/rack.service';
 import { ThemeService } from '../../core/theme.service';
 import { MaterialModule } from '../../shared/material.module';
@@ -37,6 +37,10 @@ export class RackViewComponent {
 
   /** Optional route param /racks/:id. */
   readonly id = input<string>();
+  /** Optional ?node=<id>: show the rack holding that server/switch and open its details panel. */
+  readonly node = input<string>();
+  private handledNode: string | undefined;
+  private readonly allRacks = toSignal(this.racks.racks$, { initialValue: [] as Rack[] });
 
   protected readonly selectedId = signal<string | null>(null);
   /** Which way the new rack slides in from; set when the rack changes. */
@@ -65,6 +69,23 @@ export class RackViewComponent {
       this.direction.set(dir);
       this.selectedId.set(null); // close the details panel when the rack changes
       this.racks.select(id);
+    });
+
+    // ?node=... -> jump to the node's rack and open its details. Handled once per node id, so live
+    // status updates (which re-run this effect) do not reopen a panel the user has closed.
+    effect(() => {
+      const nodeId = this.node();
+      const rack = nodeId ? this.allRacks().find((r) => r.nodes.some((n) => n.id === nodeId)) : undefined;
+      if (!nodeId || !rack || nodeId === this.handledNode) return;
+      this.handledNode = nodeId;
+      if (rack.id !== this.racks.currentRackId) {
+        this.direction.set(this.racks.indexOf(rack.id) < this.racks.indexOf(this.racks.currentRackId) ? 'prev' : 'next');
+        this.racks.select(rack.id);
+      }
+      this.selectedId.set(nodeId);
+      if (this.id() !== rack.id) {
+        void this.router.navigate(['/racks', rack.id], { queryParams: { node: nodeId }, replaceUrl: true });
+      }
     });
   }
 

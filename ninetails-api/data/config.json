@@ -1,5 +1,5 @@
 {
-  "version": "2026.10.1",
+  "version": "2026.10.2",
   "publishedAt": "2026-10-01T06:00:00Z",
   "description": "Baseline 2026.10.1 (mock)",
   "racks": [
@@ -823,7 +823,6 @@
           "rackId": "rack-c1",
           "positionU": 12,
           "sizeU": 2,
-          "envId": "env-blue",
           "teamId": "team-platform",
           "network": {
             "hostname": "srv-c1-01.dc1.example.net",

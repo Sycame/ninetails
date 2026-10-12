@@ -2,7 +2,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { EnvService } from '../../core/env.service';
-import { EnvSummary, Team } from '../../core/models';
+import { EnvSummary, Team, UnownedHardware } from '../../core/models';
 import { MaterialModule } from '../../shared/material.module';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 import { DeployButtonComponent } from './deploy-button.component';
@@ -64,6 +64,28 @@ export class EnvListComponent {
   });
 
   protected readonly visibleCount = computed(() => this.filtered().length);
+
+  private readonly unownedAll = toSignal(this.envs.unowned$, {
+    initialValue: { servers: [], switches: [] } as UnownedHardware,
+  });
+
+  /** Hardware in no environment, narrowed by the same team filter and search as the environments. */
+  protected readonly unowned = computed<UnownedHardware>(() => {
+    const team = this.team();
+    const q = this.search().trim().toLowerCase();
+    const { servers, switches } = this.unownedAll();
+    return {
+      servers: servers
+        .filter((h) => !team || h.server.teamId === team || h.groups.some((g) => g.env?.teamId === team))
+        .filter((h) => !q || [h.server.name, h.team?.name ?? '', ...h.vms.map((v) => v.name),
+          ...h.groups.map((g) => g.env?.name ?? '')].some((t) => t.toLowerCase().includes(q))),
+      switches: switches
+        .filter((n) => !team || n.teamId === team)
+        .filter((n) => !q || n.name.toLowerCase().includes(q)),
+    };
+  });
+
+  protected readonly unownedCount = computed(() => this.unowned().servers.length + this.unowned().switches.length);
 
   protected readonly groups = computed<EnvGroup[]>(() => {
     const list = this.filtered();

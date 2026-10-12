@@ -51,6 +51,9 @@ Rules for the baseline:
 - A node/VM in the baseline that the status feed does not mention is shown as `WARN` ("No status reported").
 - Environment membership lives on the machines: a node/VM belongs to an environment through its own `envId`.
   A VM's `envId` may differ from its host server's `envId`.
+- A server or switch with no `envId` is shared hardware that belongs to no environment (the app lists it under
+  "Shared hardware" on the Environments page). Its VMs keep their own `envId`, so one such server can host VMs of
+  several environments. A VM with no `envId` must run on a server that has one (the baseline is rejected otherwise).
 
 Layout rules the baseline must follow (the app checks them on every new version, logs problems to the console and the Racks tab shows a warning banner):
 - a rack unit holds one server vertically: nodes/chassis may not overlap on the same RUs;

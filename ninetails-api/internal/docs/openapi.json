@@ -438,7 +438,7 @@
           "id": { "type": "string" },
           "name": { "type": "string" },
           "hostId": { "type": "string", "description": "The server it runs on." },
-          "envId": { "type": "string", "description": "May differ from the host's environment." },
+          "envId": { "type": "string", "description": "May differ from the host's environment. Required when the host server has no environment." },
           "os": { "type": "string" }
         }
       },
