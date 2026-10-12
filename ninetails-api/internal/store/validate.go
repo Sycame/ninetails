@@ -9,6 +9,7 @@ import (
 // Validate checks a baseline for the mistakes a change process can introduce and returns
 // human-readable problems (empty = valid). The same layout rules are enforced by the Angular app:
 //   - ids are unique and references resolve (rack, chassis, host, environment, team);
+//   - a VM without an environment must run on a server that has one;
 //   - everything fits inside its rack and nothing overlaps (a rack unit holds one server vertically);
 //   - inside a chassis, nodes stay within its grid and never share a cell.
 func Validate(b *model.ConfigBaseline) []string {
@@ -41,6 +42,7 @@ func Validate(b *model.ConfigBaseline) []string {
 	}
 
 	nodeIDs := map[string]string{} // id -> type
+	nodeEnv := map[string]string{} // id -> environment id ("" = belongs to no environment)
 	rackIDs := map[string]bool{}
 	for _, r := range b.Racks {
 		if rackIDs[r.ID] {
@@ -87,6 +89,7 @@ func Validate(b *model.ConfigBaseline) []string {
 				add("duplicate node id %q", n.ID)
 			}
 			nodeIDs[n.ID] = n.Type
+			nodeEnv[n.ID] = n.EnvID
 			if n.Type != "server" && n.Type != "switch" {
 				add("node %q: type must be \"server\" or \"switch\"", n.Name)
 			}
@@ -157,6 +160,11 @@ func Validate(b *model.ConfigBaseline) []string {
 		}
 		if v.EnvID != "" && !envs[v.EnvID] {
 			add("vm %q: unknown environment %q", v.Name, v.EnvID)
+		}
+		// A VM's environment is independent of its host's, but a VM on shared (unowned) hardware
+		// must name its environment, otherwise nothing owns it.
+		if v.EnvID == "" && nodeIDs[v.HostID] == "server" && nodeEnv[v.HostID] == "" {
+			add("vm %q: no environment, and its host %q belongs to none either", v.Name, v.HostID)
 		}
 	}
 	return p

@@ -160,6 +160,27 @@ export interface ForeignVm {
   hostName: string;
 }
 
+/** A group of VMs on a shared server that belong to one environment (`env` undefined => VMs with no environment). */
+export interface SharedVmGroup {
+  env?: Environment;
+  vms: Vm[];
+}
+
+/** A server that belongs to no environment; its VMs may belong to several (or none). */
+export interface SharedHost {
+  server: Server;
+  team?: Team;
+  status: Status;
+  vms: Vm[];
+  groups: SharedVmGroup[];
+}
+
+/** Hardware that belongs to no environment. */
+export interface UnownedHardware {
+  servers: SharedHost[];
+  switches: Switch[];
+}
+
 /**
  * View model: an environment with everything attached and a rolled-up status.
  * An Environment is just a free-form name for a set of machines (servers, switches) and VMs.
