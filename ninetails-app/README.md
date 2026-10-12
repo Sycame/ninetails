@@ -211,7 +211,7 @@ and **Logout**. The footer shows the overall health and the time of the last syn
 
 - **Racks**: shows one rack at a time. Use the arrows (or Page Up / Page Down) to move between racks. Each server and
   switch is coloured by its status (`OK`, `WARN`, `FAIL`). Click one to open its detail drawer, with health checks,
-  network interfaces and link state, and the VMs it hosts; open it as its own page for a shareable link (`/node/<id>`).
+  network interfaces and link state, and the VMs it hosts; a link like `/racks/<rack>?node=<id>` opens a rack with that node's drawer already open.
 - **Environments**: lists every environment with its status. Filter by team, switch between "By team" and "All", and
   expand an environment to see the servers, switches and VMs it uses. **Open page** shows one environment alone.
   Press **Deploy** on an environment to start a deployment. Any signed-in user can deploy to any environment (a user's team cannot be verified, so teams are
@@ -254,7 +254,7 @@ src/app/
   layout/                  shell (header, navbar, footer; starts data loading and the live stream)
   features/
     login/                 login, callback (OAuth redirect target)
-    racks/                 rack-view, rack-layout, node-details (drawer + page), node-page
+    racks/                 rack-view, rack-layout, node-details (drawer)
     envs/                  env-list (team filter), env-tree, env-detail, deploy-button
     misc/                  teams, deployments, settings
 ```
@@ -313,7 +313,6 @@ All routes except `/login` and `/auth/callback` are children of the shell and la
 | Path | Page |
 |---|---|
 | `/racks`, `/racks/:id` | rack front view (previous/next rack navigation) |
-| `/node/:id` | full page for one server or switch |
 | `/envs`, `/envs/:id` | environment list (team filter) and detail with Deploy |
 | `/teams`, `/deployments`, `/settings` | team list, deployment history, config version and update check |
 
