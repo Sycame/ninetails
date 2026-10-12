@@ -1,0 +1,95 @@
+# Build the Angular app (ninetails-app) behind a corporate proxy, installing from a Nexus npm registry.
+#
+# This file lives in the app folder and is for the app only. GitLab looks for .gitlab-ci.yml in the repository
+# root by default, so point the project at this file once:
+#   Settings > CI/CD > General pipelines > CI/CD configuration file = ninetails-app/.gitlab-ci.yml
+# The checkout is still the whole repository, so every path below is relative to the repository root.
+#
+# Set these in GitLab > Settings > CI/CD > Variables (do NOT commit them):
+#   NPM_REGISTRY   (Variable)           URL of the Nexus npm *group* repo, with trailing slash,
+#                                       e.g. https://nexus.example.com/repository/npm-group/
+#   NEXUS_USER     (Variable)           Nexus user name
+#   NEXUS_TOKEN    (Variable, Masked)   Nexus user token / password
+# Optional:
+#   NODE_IMAGE     image to build in. Default node:22.23.2-alpine. Behind a proxy this usually has to come from Nexus,
+#                  e.g. nexus.example.com:5000/node:22.23.2-alpine (the runner must be allowed to pull it).
+#   HTTPS_PROXY / HTTP_PROXY / NO_PROXY   only if the runner does not already have them set (see notes below).
+#   NODE_EXTRA_CA_CERTS                   path to your company root CA (PEM) if Nexus/proxy uses a private CA.
+
+variables:
+  NODE_IMAGE: node:22.23.2-alpine
+  # Keep npm's cache inside the project so GitLab can cache it between jobs.
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  NPM_CONFIG_UPDATE_NOTIFIER: "false"
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_AUDIT: "false"        # the audit endpoint is rarely proxied by Nexus; it only slows the install
+  NG_CLI_ANALYTICS: "false"        # Angular CLI would otherwise try to phone home
+
+stages:
+  - build
+
+build-app:
+  stage: build
+  image: $NODE_IMAGE
+  # Only when the app changes (API-only or doc-only commits do not trigger it): on merge requests and on the
+  # default branch. Run it by hand with "Run pipeline" any time.
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - ninetails-app/**/*
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - ninetails-app/**/*
+  cache:
+    key:
+      files:
+        - ninetails-app/package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - cd ninetails-app
+    - test -n "$NPM_REGISTRY" -a -n "$NEXUS_USER" -a -n "$NEXUS_TOKEN" || { echo "Set NPM_REGISTRY, NEXUS_USER and NEXUS_TOKEN in CI/CD variables"; exit 1; }
+    # Write a throw-away .npmrc (never committed). Nexus npm auth = base64("user:token") sent as Basic auth.
+    - AUTH=$(printf '%s:%s' "$NEXUS_USER" "$NEXUS_TOKEN" | base64 | tr -d '\n')
+    - HOSTPATH=${NPM_REGISTRY#*:}                       # //nexus.example.com/repository/npm-group/
+    - |
+      cat > .npmrc <<EOF
+      registry=${NPM_REGISTRY}
+      ${HOSTPATH}:_auth=${AUTH}
+      ${HOSTPATH}:always-auth=true
+      EOF
+    # Sanity checks that fail fast with a readable error instead of hanging in `npm ci`.
+    - node -v && npm -v
+    - npm ping || { echo "Cannot reach or authenticate to $NPM_REGISTRY (see notes at the top of this file)"; exit 1; }
+  script:
+    - npm ci --no-audit --no-fund --prefer-offline --fetch-retries=5 --fetch-retry-mintimeout=20000
+    - npx ng build
+  after_script:
+    - rm -f ninetails-app/.npmrc          # do not leave the token in the workspace/artifacts
+  artifacts:
+    name: ninetails-app-$CI_COMMIT_SHORT_SHA
+    paths:
+      - ninetails-app/dist/
+    expire_in: 1 week
+
+# ---------------------------------------------------------------------------------------------------
+# Notes on the usual proxy / network problems
+#
+# 1. Do NOT send Nexus traffic through the corporate proxy if Nexus is on the internal network.
+#    Set NO_PROXY to include the Nexus host (e.g. NO_PROXY=nexus.example.com,.example.com). Setting
+#    HTTPS_PROXY for an internal host is the most common reason `npm ci` hangs or returns 403/407.
+# 2. If the runner really must use a proxy to reach Nexus, add to the .npmrc heredoc above:
+#      proxy=${HTTP_PROXY}
+#      https-proxy=${HTTPS_PROXY}
+#      noproxy=${NO_PROXY}
+# 3. "self-signed certificate in certificate chain" / UNABLE_TO_VERIFY_LEAF_SIGNATURE: the proxy or Nexus
+#    uses a private CA. Provide the root CA as a File-type variable and set NODE_EXTRA_CA_CERTS to it, and
+#    add `cafile=${NODE_EXTRA_CA_CERTS}` to the .npmrc. Avoid `strict-ssl=false` except for a quick test.
+# 4. 401/403 from Nexus: the token must be allowed to read the group repo; if the user token is
+#    "name code + pass code" instead of a password, use those as NEXUS_USER / NEXUS_TOKEN.
+# 5. package-lock.json has registry.npmjs.org URLs; npm rewrites that host to NPM_REGISTRY automatically
+#    (replace-registry-host=npmjs, the default), so the lock file does not need editing.
+# 6. If the job cannot pull $NODE_IMAGE, that is a runner/Docker registry problem, not npm: mirror the
+#    node:22.23.2-alpine image into Nexus's Docker repo and point NODE_IMAGE at it.
+# ---------------------------------------------------------------------------------------------------
