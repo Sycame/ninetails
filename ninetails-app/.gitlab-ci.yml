@@ -5,16 +5,33 @@
 #   Settings > CI/CD > General pipelines > CI/CD configuration file = ninetails-app/.gitlab-ci.yml
 # The checkout is still the whole repository, so every path below is relative to the repository root.
 #
+# The Nexus login comes from HashiCorp Vault, not from CI/CD variables. The `secrets:` block on the job below
+# reads it and exposes NEXUS_USER and NEXUS_TOKEN as ordinary environment variables for this job only.
+# That needs, from the shared CI file you include (see the commented `include:` below):
+#   default: id_tokens: VAULT_ID_TOKEN   (aud = your Vault; GitLab uses this token to log in to Vault)
+#   VAULT_SERVER_URL                     (e.g. https://vault.example.com)
+#   VAULT_AUTH_ROLE / VAULT_AUTH_PATH    (JWT auth role bound to this project, and its mount; path defaults to jwt)
+#   VAULT_NAMESPACE                      (only for Vault Enterprise namespaces)
+# and in Vault: a role that may read the secret path used below. The path, field names and KV version below are
+# placeholders: set them to where the Nexus credential really lives.
+#
 # Set these in GitLab > Settings > CI/CD > Variables (do NOT commit them):
 #   NPM_REGISTRY   (Variable)           URL of the Nexus npm *group* repo, with trailing slash,
 #                                       e.g. https://nexus.example.com/repository/npm-group/
-#   NEXUS_USER     (Variable)           Nexus user name
-#   NEXUS_TOKEN    (Variable, Masked)   Nexus user token / password
 # Optional:
 #   NODE_IMAGE     image to build in. Default node:22.23.2-alpine. Behind a proxy this usually has to come from Nexus,
 #                  e.g. nexus.example.com:5000/node:22.23.2-alpine (the runner must be allowed to pull it).
 #   HTTPS_PROXY / HTTP_PROXY / NO_PROXY   only if the runner does not already have them set (see notes below).
 #   NODE_EXTRA_CA_CERTS                   path to your company root CA (PEM) if Nexus/proxy uses a private CA.
+
+# Shared file from another GitLab project that defines `default: id_tokens: VAULT_ID_TOKEN` and the VAULT_*
+# variables. PLACEHOLDERS: replace project, ref and file. The pipeline will not start until these point at a real
+# file the CI user can read (the other project must allow it: Settings > CI/CD > Job token permissions, or be
+# internal/public). Pin `ref` to a tag or branch you control; the included file runs with your job's secrets.
+include:
+  - project: 'your-group/ci-templates'
+    ref: main
+    file: '/vault.gitlab-ci.yml'
 
 variables:
   NODE_IMAGE: node:22.23.2-alpine
@@ -31,16 +48,26 @@ stages:
 build-app:
   stage: build
   image: $NODE_IMAGE
-  # Only when the app changes (API-only or doc-only commits do not trigger it): on merge requests and on the
-  # default branch. Run it by hand with "Run pipeline" any time.
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "web"
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - ninetails-app/**/*
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - ninetails-app/**/*
+  # Nexus credential from Vault (logs in with VAULT_ID_TOKEN). `file: false` gives a plain variable; the default
+  # would write the value to a temp file and set the variable to that file's path.
+  # PLACEHOLDERS: engine name (kv-v2 or kv-v1), engine path (the mount), secret path and field names.
+  secrets:
+    NEXUS_USER:
+      vault:
+        engine:
+          name: kv-v2
+          path: secret
+        path: ninetails/nexus
+        field: username
+      file: false
+    NEXUS_TOKEN:
+      vault:
+        engine:
+          name: kv-v2
+          path: secret
+        path: ninetails/nexus
+        field: password
+      file: false
   cache:
     key:
       files:
@@ -49,7 +76,8 @@ build-app:
       - .npm/
   before_script:
     - cd ninetails-app
-    - test -n "$NPM_REGISTRY" -a -n "$NEXUS_USER" -a -n "$NEXUS_TOKEN" || { echo "Set NPM_REGISTRY, NEXUS_USER and NEXUS_TOKEN in CI/CD variables"; exit 1; }
+    - test -n "$NPM_REGISTRY" || { echo "Set NPM_REGISTRY in CI/CD variables"; exit 1; }
+    - test -n "$NEXUS_USER" -a -n "$NEXUS_TOKEN" || { echo "NEXUS_USER / NEXUS_TOKEN are empty: check the Vault path and field names in the secrets block"; exit 1; }
     # Write a throw-away .npmrc (never committed). Nexus npm auth = base64("user:token") sent as Basic auth.
     - AUTH=$(printf '%s:%s' "$NEXUS_USER" "$NEXUS_TOKEN" | base64 | tr -d '\n')
     - HOSTPATH=${NPM_REGISTRY#*:}                       # //nexus.example.com/repository/npm-group/
@@ -86,6 +114,10 @@ build-app:
 # 3. "self-signed certificate in certificate chain" / UNABLE_TO_VERIFY_LEAF_SIGNATURE: the proxy or Nexus
 #    uses a private CA. Provide the root CA as a File-type variable and set NODE_EXTRA_CA_CERTS to it, and
 #    add `cafile=${NODE_EXTRA_CA_CERTS}` to the .npmrc. Avoid `strict-ssl=false` except for a quick test.
+# 3b. Vault errors (before any script output): "could not authenticate" / 403 = the Vault role does not allow this
+#    project/branch or the aud of VAULT_ID_TOKEN does not match; "no secret found" / empty values = wrong path, field
+#    or KV version (kv-v2 reads secret/data/<path>, kv-v1 reads secret/<path>); `secrets:` itself is rejected =
+#    the GitLab tier does not include native Vault support (then log in to Vault in the script instead).
 # 4. 401/403 from Nexus: the token must be allowed to read the group repo; if the user token is
 #    "name code + pass code" instead of a password, use those as NEXUS_USER / NEXUS_TOKEN.
 # 5. package-lock.json has registry.npmjs.org URLs; npm rewrites that host to NPM_REGISTRY automatically
