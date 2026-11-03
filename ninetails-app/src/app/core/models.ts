@@ -141,11 +141,19 @@ export interface Vm {
   os: string;
 }
 
+/** A web UI an environment serves (the product, a terminal, ...). Opened in a new tab. */
+export interface Website {
+  name: string;
+  /** Absolute http(s) URL. */
+  url: string;
+}
+
 export interface Environment {
   id: string;
-  name: string; // used in POST /deploy/:envName
+  name: string; // free-form label; deployments address the environment by id
   description?: string;
   teamId: string;
+  websites?: Website[];
 }
 
 /** A server that belongs to an environment, with the environment's VMs running on it. */

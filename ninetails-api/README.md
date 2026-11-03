@@ -313,6 +313,7 @@ validates it and, if good, publishes it and pushes `config.changed` to every con
 Rules enforced on every publish:
 
 - ids are unique and every reference resolves (rack, chassis, host server, environment, team);
+- an environment's `websites` each have a name (unique within the environment) and an absolute `http(s)` url;
 - everything fits its rack and nothing overlaps (a rack unit holds one server vertically); chassis members stay in their grid and never share a cell;
 - unknown JSON fields are rejected (they are nearly always typos);
 - a published version is immutable: same `version` with different content is refused.

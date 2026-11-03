@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"net/url"
 
 	"ninetails-api/internal/model"
 )
@@ -9,6 +10,7 @@ import (
 // Validate checks a baseline for the mistakes a change process can introduce and returns
 // human-readable problems (empty = valid). The same layout rules are enforced by the Angular app:
 //   - ids are unique and references resolve (rack, chassis, host, environment, team);
+//   - an environment's websites have a unique name and an absolute http(s) url;
 //   - a VM without an environment must run on a server that has one;
 //   - everything fits inside its rack and nothing overlaps (a rack unit holds one server vertically);
 //   - inside a chassis, nodes stay within its grid and never share a cell.
@@ -38,6 +40,19 @@ func Validate(b *model.ConfigBaseline) []string {
 		envs[e.ID] = true
 		if !teams[e.TeamID] {
 			add("environment %q: unknown team %q", e.Name, e.TeamID)
+		}
+		sites := map[string]bool{}
+		for _, w := range e.Websites {
+			if w.Name == "" {
+				add("environment %q: a website has no name", e.Name)
+			} else if sites[w.Name] {
+				add("environment %q: duplicate website name %q", e.Name, w.Name)
+			}
+			sites[w.Name] = true
+			// Only http(s): the app puts this in a link, and anything else (javascript:, data:) must not get in.
+			if u, err := url.Parse(w.URL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+				add("environment %q: website %q needs an absolute http(s) url, got %q", e.Name, w.Name, w.URL)
+			}
 		}
 	}
 

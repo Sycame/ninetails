@@ -10,31 +10,8 @@ let nextId = 0;
  */
 @Component({
   selector: 'app-logo',
-  template: `
-    <svg viewBox="0 0 24 24" fill="none" [attr.width]="size()" [attr.height]="size()" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient [attr.id]="gradientId" x1="4" y1="2" x2="20" y2="21" gradientUnits="userSpaceOnUse">
-          <stop offset="0" style="stop-color: var(--neon-violet)" />
-          <stop offset="1" style="stop-color: var(--neon-magenta)" />
-        </linearGradient>
-      </defs>
-      <g [attr.stroke]="'url(#' + gradientId + ')'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5.5V21" />
-        <path d="M9.6 8.5 12 5.5l2.4 3" />
-        <path d="M5 7.5V10a7 7 0 0 0 14 0V7.5" />
-        <path d="M2.8 10.5 5 7.5l2.2 3" />
-        <path d="m16.8 10.5 2.2-3 2.2 3" />
-      </g>
-      <path class="spark" d="M18.6 1.2l.62 1.68 1.68.62-1.68.62-.62 1.68-.62-1.68-1.68-.62 1.68-.62z" />
-      <circle class="dot" cx="5.2" cy="3.4" r=".75" />
-    </svg>
-  `,
-  styles: `
-    :host { display: inline-flex; line-height: 0; }
-    svg { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--neon-magenta) 55%, transparent)); }
-    .spark { fill: var(--neon-cyan); }
-    .dot { fill: var(--neon-magenta); }
-  `,
+  templateUrl: './logo.component.html',
+  styleUrl: './logo.component.scss',
 })
 export class LogoComponent {
   /** Width and height in px. */

@@ -349,7 +349,20 @@
           "id": { "type": "string" },
           "name": { "type": "string", "description": "Free-form; may contain spaces and symbols." },
           "description": { "type": "string" },
-          "teamId": { "type": "string" }
+          "teamId": { "type": "string" },
+          "websites": {
+            "type": "array",
+            "description": "Web UIs this environment serves (the product, a terminal, ...). The app lists them and opens each in a new tab.",
+            "items": { "$ref": "#/components/schemas/Website" }
+          }
+        }
+      },
+      "Website": {
+        "type": "object",
+        "required": ["name", "url"],
+        "properties": {
+          "name": { "type": "string", "description": "Shown as the link text; unique within the environment." },
+          "url": { "type": "string", "format": "uri", "description": "Absolute http or https URL." }
         }
       },
       "Placement": {

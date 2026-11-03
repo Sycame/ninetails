@@ -54,6 +54,9 @@ Rules for the baseline:
 - A server or switch with no `envId` is shared hardware that belongs to no environment (the app lists it under
   "Shared hardware" on the Environments page). Its VMs keep their own `envId`, so one such server can host VMs of
   several environments. A VM with no `envId` must run on a server that has one (the baseline is rejected otherwise).
+- An environment may list the web UIs it serves: `"websites": [{ "name": "Product", "url": "https://app.example.com" }, ...]`.
+  The app shows one link per entry and opens each in a new tab. `name` is required and unique within the environment;
+  `url` must be an absolute `http(s)` URL (anything else rejects the baseline). The field is optional.
 
 Layout rules the baseline must follow (the app checks them on every new version, logs problems to the console and the Racks tab shows a warning banner):
 - a rack unit holds one server vertically: nodes/chassis may not overlap on the same RUs;

@@ -1,7 +1,7 @@
-{
-  "version": "2026.10.2",
-  "publishedAt": "2026-10-01T06:00:00Z",
-  "description": "Baseline 2026.10.1 (mock)",
+﻿{
+  "version": "2026.11.2",
+  "publishedAt": "2026-11-03T06:00:00Z",
+  "description": "Baseline 2026.11.2 (mock): environment websites",
   "racks": [
     {
       "id": "rack-a1",
@@ -1013,55 +1013,133 @@
       "id": "env-prod",
       "name": "prod",
       "description": "Customer-facing production",
-      "teamId": "team-platform"
+      "teamId": "team-platform",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://app.example.com"
+        },
+        {
+          "name": "Terminal",
+          "url": "https://terminal.example.com"
+        },
+        {
+          "name": "Admin",
+          "url": "https://admin.example.com"
+        }
+      ]
     },
     {
       "id": "env-blue",
       "name": "blue",
       "description": "Blue half of the blue/green pair",
-      "teamId": "team-platform"
+      "teamId": "team-platform",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://blue.app.example.com"
+        },
+        {
+          "name": "Terminal",
+          "url": "https://blue.terminal.example.com"
+        }
+      ]
     },
     {
       "id": "env-green",
       "name": "green",
       "description": "Green half of the blue/green pair",
-      "teamId": "team-platform"
+      "teamId": "team-platform",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://green.app.example.com"
+        },
+        {
+          "name": "Terminal",
+          "url": "https://green.terminal.example.com"
+        }
+      ]
     },
     {
       "id": "env-staging",
       "name": "staging",
       "description": "Pre-production testing",
-      "teamId": "team-apps"
+      "teamId": "team-apps",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://staging.app.example.com"
+        },
+        {
+          "name": "Terminal",
+          "url": "https://staging.terminal.example.com"
+        }
+      ]
     },
     {
       "id": "env-qa3",
       "name": "qa-3",
       "description": "Third QA environment",
-      "teamId": "team-apps"
+      "teamId": "team-apps",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://qa3.app.example.com"
+        }
+      ]
     },
     {
       "id": "env-demo",
       "name": "demo_2026",
       "description": "Sales demo, torn down after the conference",
-      "teamId": "team-apps"
+      "teamId": "team-apps",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://demo.example.com"
+        }
+      ]
     },
     {
       "id": "env-legacy",
       "name": "legacy",
       "description": "Decommissioning soon",
-      "teamId": "team-apps"
+      "teamId": "team-apps",
+      "websites": [
+        {
+          "name": "Product",
+          "url": "https://legacy.example.com"
+        }
+      ]
     },
     {
       "id": "env-pay-sbx",
       "name": "Payments Sandbox (EU)",
       "description": "Partner integration sandbox",
-      "teamId": "team-payments"
+      "teamId": "team-payments",
+      "websites": [
+        {
+          "name": "Sandbox portal",
+          "url": "https://sandbox.payments.example.com"
+        },
+        {
+          "name": "API docs",
+          "url": "https://sandbox.payments.example.com/docs"
+        }
+      ]
     },
     {
       "id": "env-ml",
       "name": "ML training / GPU pool",
       "description": "Shared training capacity",
-      "teamId": "team-data"
+      "teamId": "team-data",
+      "websites": [
+        {
+          "name": "Training dashboard",
+          "url": "https://ml.example.com"
+        }
+      ]
     },
     {
       "id": "env-spare",

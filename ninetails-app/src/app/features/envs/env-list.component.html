@@ -55,6 +55,9 @@
             <app-deploy-button [envId]="s.env.id" [envName]="s.env.name" />
             <a mat-button [routerLink]="['/envs', s.env.id]"><mat-icon>open_in_new</mat-icon> Open page</a>
           </div>
+          @if (s.env.websites?.length) {
+            <div class="sites"><app-env-sites [sites]="s.env.websites" /></div>
+          }
           <app-env-tree [summary]="s" />
         </ng-template>
       </mat-expansion-panel>

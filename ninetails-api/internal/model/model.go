@@ -19,11 +19,18 @@ type Team struct {
 	Name string `json:"name"`
 }
 
+// Website is a web UI an environment serves (the product, a terminal, ...); the app opens it in a new tab.
+type Website struct {
+	Name string `json:"name"`
+	URL  string `json:"url"` // absolute http(s) URL
+}
+
 type Environment struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"` // free-form, may contain spaces/symbols
-	Description string `json:"description,omitempty"`
-	TeamID      string `json:"teamId"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"` // free-form, may contain spaces/symbols
+	Description string    `json:"description,omitempty"`
+	TeamID      string    `json:"teamId"`
+	Websites    []Website `json:"websites,omitempty"`
 }
 
 // Placement is a node's cell inside a chassis grid (1-based): columns x one row per RU.

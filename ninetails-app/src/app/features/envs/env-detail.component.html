@@ -12,6 +12,11 @@
     · {{ s.servers.length }} servers · {{ s.switches.length }} switches · {{ s.vms.length }} VMs
   </p>
 
+  @if (s.env.websites?.length) {
+    <h3>Websites</h3>
+    <app-env-sites [sites]="s.env.websites" />
+  }
+
   <app-deploy-button [envId]="s.env.id" [envName]="s.env.name" />
   <app-env-tree [summary]="s" />
 } @else {

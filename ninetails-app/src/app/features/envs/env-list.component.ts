@@ -6,6 +6,7 @@ import { EnvSummary, Team, UnownedHardware } from '../../core/models';
 import { MaterialModule } from '../../shared/material.module';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 import { DeployButtonComponent } from './deploy-button.component';
+import { EnvSitesComponent } from './env-sites.component';
 import { EnvTreeComponent } from './env-tree.component';
 
 interface EnvGroup {
@@ -26,7 +27,7 @@ interface EnvGroup {
  */
 @Component({
   selector: 'app-env-list',
-  imports: [MaterialModule, RouterLink, StatusBadgeComponent, EnvTreeComponent, DeployButtonComponent],
+  imports: [MaterialModule, RouterLink, StatusBadgeComponent, EnvTreeComponent, DeployButtonComponent, EnvSitesComponent],
   templateUrl: './env-list.component.html',
   styleUrl: './env-list.component.scss',
 })

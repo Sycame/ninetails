@@ -7,12 +7,13 @@ import { EnvService } from '../../core/env.service';
 import { MaterialModule } from '../../shared/material.module';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 import { DeployButtonComponent } from './deploy-button.component';
+import { EnvSitesComponent } from './env-sites.component';
 import { EnvTreeComponent } from './env-tree.component';
 
 /** One environment on its own page (deep link): owner, status, deploy, and the same tree as the list. */
 @Component({
   selector: 'app-env-detail',
-  imports: [MaterialModule, AsyncPipe, RouterLink, StatusBadgeComponent, DeployButtonComponent, EnvTreeComponent],
+  imports: [MaterialModule, AsyncPipe, RouterLink, StatusBadgeComponent, DeployButtonComponent, EnvSitesComponent, EnvTreeComponent],
   templateUrl: './env-detail.component.html',
   styleUrl: './env-detail.component.scss',
 })

@@ -1,0 +1,5 @@
+@for (w of sites(); track w.name) {
+  <a mat-stroked-button [href]="w.url" target="_blank" rel="noopener noreferrer" [attr.title]="w.url">
+    <mat-icon>open_in_new</mat-icon> {{ w.name }}
+  </a>
+}

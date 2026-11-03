@@ -1,0 +1,4 @@
+:host { display: inline-flex; line-height: 0; }
+svg { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--neon-magenta) 55%, transparent)); }
+.spark { fill: var(--neon-cyan); }
+.dot { fill: var(--neon-magenta); }
